@@ -20,3 +20,20 @@ This project aims to measure and analyze short-term air quality changes using **
 
 ---
 *🚀 Currently under active development.*
+---
+
+## 📅 Project Roadmap
+
+- [ ] **Phase 1: Research & Planning** (Current)
+    - [ ] Literature review on low-cost air quality sensors.
+    - [ ] Selecting hardware components (Sensors, Microcontrollers).
+    - [ ] Defining data collection methodology.
+- [ ] **Phase 2: Data Collection**
+    - [ ] Setting up the IoT sensor kit.
+    - [ ] Collecting raw air quality data (CSV format).
+- [ ] **Phase 3: Development**
+    - [ ] Data cleaning and preprocessing with **Pandas**.
+    - [ ] Building Regression models with **Scikit-learn**.
+- [ ] **Phase 4: Analysis & Reporting**
+    - [ ] Visualizing results.
+    - [ ] Final thesis documentation.
