@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hava Kalitesi Tahmin Uygulaması - PM10 seviyelerini yapay zeka ile tahmin edin">
+    <title>AQI Predictor - Hava Kalitesi Tahmini</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+    <div id="screen1" class="screen active">
+        <div class="container">
+
+            <header class="header">
+                <div class="header-left">
+                    <h1 class="app-title">HAVA KALİTESİ TAHMİNİ</h1>
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span>CANLI YAYIN AKTİF</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn" id="settingsBtn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                            <circle cx="10" cy="10" r="3"></circle>
+                            <path
+                                d="M10 1v2m0 14v2M4.22 4.22l1.42 1.42m8.72 8.72l1.42 1.42M1 10h2m14 0h2M4.22 15.78l1.42-1.42m8.72-8.72l1.42-1.42">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="prediction-card fade-in">
+                <div class="prediction-card-content">
+                    <div class="prediction-label">PREDICTED PM10 DENSITY</div>
+                    <div class="prediction-value">
+                        <span id="pm10Value">42.5</span>
+                        <span class="prediction-unit">µg/m³</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-banner good slide-up">
+                <div class="status-icon">✓</div>
+                <div class="status-content">
+                    <h4>SAĞLIK DURUMU: İYİ</h4>
+                </div>
+            </div>
+
+            <div class="prediction-card">
+                <div class="confidence-info">
+                    <div class="confidence-item">
+                        <div class="confidence-label">Güven</div>
+                        <div class="confidence-value">95.4%</div>
+                    </div>
+                    <div class="confidence-item">
+                        <div class="confidence-label">Son Güncelleme</div>
+                        <div class="confidence-value">Az önce</div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Sensör Parametreleri</h2>
+                <a href="#" class="section-action" id="resetBtn">SIFIRLA</a>
+            </div>
+
+            <div class="sensor-parameters">
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">SO₂</div>
+                            <span class="sensor-name">Sulfur Dioxide</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span id="so2Display">124</span>
+                            <span class="sensor-unit">µg/m³</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" id="so2Fill" style="width: 50%"></div>
+                        <input type="range" class="slider" id="so2Slider" min="0" max="500" value="124">
+                    </div>
+                </div>
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">NO₂</div>
+                            <span class="sensor-name">Nitrogen Dioxide</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span id="no2Display">38</span>
+                            <span class="sensor-unit">µg/m³</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" id="no2Fill" style="width: 30%"></div>
+                        <input type="range" class="slider" id="no2Slider" min="0" max="300" value="38">
+                    </div>
+                </div>
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">CO</div>
+                            <span class="sensor-name">Carbon Monoxide</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span id="coDisplay">0.8</span>
+                            <span class="sensor-unit">µg/m³</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" id="coFill" style="width: 20%"></div>
+                        <input type="range" class="slider" id="coSlider" min="0" max="10" step="0.1" value="0.8">
+                    </div>
+                </div>
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">O₃</div>
+                            <span class="sensor-name">Ozone</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span id="o3Display">72</span>
+                            <span class="sensor-unit">µg/m³</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" id="o3Fill" style="width: 45%"></div>
+                        <input type="range" class="slider" id="o3Slider" min="0" max="200" value="72">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Tahmin Trendi (24S)</h2>
+                <a href="#" class="section-action" id="expandTrendBtn">Genişlet</a>
+
+            </div>
+
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+
+            <button class="btn btn-primary btn-full mt-lg" id="runSimulationBtn">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2" />
+                    <path d="M8 10l2 2 4-4" stroke="currentColor" stroke-width="2" />
+                </svg>
+                SİMÜLASYONU ÇALIŞTIR
+            </button>
+        </div>
+    </div>
+
+    <div id="screen2" class="screen">
+        <div class="container">
+
+            <header class="header">
+                <div class="header-left">
+                    <h1 class="app-title">HAVA KALİTESİ <span class="highlight">TAHMİNİ</span></h1>
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span>SİSTEM AKTİF</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M3 3h6v6H3zM11 3h6v6h-6zM3 11h6v6H3zM11 11h6v6h-6z" stroke="currentColor"
+                                stroke-width="2" />
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="prediction-card fade-in">
+                <div class="prediction-card-content">
+                    <div class="prediction-label">PREDICTED PM10 DENSITY</div>
+                    <div class="prediction-value">
+                        <span id="pm10Value2">58.4</span>
+                        <span class="prediction-unit">µg/m³</span>
+                    </div>
+                    <div class="prediction-change">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 4l4 4H4z" />
+                        </svg>
+                        <span>SON GÜNCELLEMEDEN BU YANA +1.2%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-banner moderate slide-up">
+                <div class="status-icon">⚠</div>
+                <div class="status-content">
+                    <span class="status-label">Durum</span>
+                    <h4>ORTA</h4>
+                    <p>Hava kalitesi kabul edilebilir düzeydedir. Ancak bazı kirleticiler için hassas bireylerde orta
+                        düzeyde sağlık endişesi olabilir.</p>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Gaz Parametreleri</h2>
+                <span class="section-action">Birim: ppb / µg/m³</span>
+            </div>
+
+            <div class="sensor-parameters">
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">SO₂</div>
+                            <span class="sensor-name">KÜKÜRTDİOKSİT (SO2)</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span>12.4</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" style="width: 40%"></div>
+                        <input type="range" class="slider" min="0" max="100" value="40">
+                    </div>
+                </div>
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">NO₂</div>
+                            <span class="sensor-name">AZOTDİOKSİT (NO2)</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span>45.0</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" style="width: 55%"></div>
+                        <input type="range" class="slider" min="0" max="100" value="55">
+                    </div>
+                </div>
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">CO</div>
+                            <span class="sensor-name">KARBONMONOKSİT (CO)</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span>0.8</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" style="width: 25%"></div>
+                        <input type="range" class="slider" min="0" max="10" step="0.1" value="2.5">
+                    </div>
+                </div>
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">O₃</div>
+                            <span class="sensor-name">OZONE (O3)</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span>32.2</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" style="width: 65%"></div>
+                        <input type="range" class="slider" min="0" max="100" value="65">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Geçmiş Trend (24S)</h2>
+            </div>
+
+            <div class="chart-container" style="height: 180px;">
+                <canvas id="historicalChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen3" class="screen">
+        <div class="container">
+
+            <header class="header">
+                <div class="header-left">
+                    <h1 class="app-title">Hava Kalitesi Tahmini</h1>
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span>İSTASYON: ENG-492 • ÇEVRİMİÇİ</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M3 3h6v6H3zM11 3h6v6h-6zM3 11h6v6H3zM11 11h6v6h-6z" stroke="currentColor"
+                                stroke-width="2" />
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="gauge-container">
+                <div class="circular-gauge" style="--gauge-percentage: 45%">
+                    <div class="gauge-bg">
+                        <div class="gauge-inner">
+                            <div class="gauge-label">PM10 TAHMİNİ</div>
+                            <div class="gauge-value">45</div>
+                            <div class="gauge-unit">µg/m³</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-banner good slide-up">
+                <div class="status-icon">✓</div>
+                <div class="status-content">
+                    <h4>İYİ HAVA KALİTESİ</h4>
+                    <p>Tahmin edilen seviyeler sağlıklı sınırlar içindedir.</p>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Sensor Parameters</h2>
+            </div>
+
+            <div class="sensor-parameters">
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">SO₂</div>
+                            <span class="sensor-name">Sulfur Dioxide</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span>12 ppb</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" style="width: 24%"></div>
+                        <input type="range" class="slider" min="0" max="100" value="24">
+                    </div>
+                </div>
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">NO₂</div>
+                            <span class="sensor-name">Nitrogen Dioxide</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span>34 ppb</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" style="width: 50%"></div>
+                        <input type="range" class="slider" min="0" max="100" value="50">
+                    </div>
+                </div>
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">CO</div>
+                            <span class="sensor-name">Carbon Monoxide</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span>0.8 ppm</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" style="width: 16%"></div>
+                        <input type="range" class="slider" min="0" max="10" step="0.1" value="1.6">
+                    </div>
+                </div>
+
+                <div class="sensor-item">
+                    <div class="sensor-header">
+                        <div class="sensor-label-wrapper">
+                            <div class="sensor-icon">O₃</div>
+                            <span class="sensor-name">Ozone</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span>42 ppb</span>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-fill" style="width: 60%"></div>
+                        <input type="range" class="slider" min="0" max="100" value="60">
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-icon">🔋</div>
+                    <span class="info-value">94%</span>
+                    <span class="info-label">Pil</span>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">📶</div>
+                    <span class="info-value">-64dB</span>
+                    <span class="info-label">Sinyal</span>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">⏱</div>
+                    <span class="info-value">12d</span>
+                    <span class="info-label">Çalışma Süresi</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-full mt-lg" id="updateBtn">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M17 10a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" />
+                    <path d="M10 6v4l3 2" stroke="currentColor" stroke-width="2" />
+                </svg>
+                TAHMİNİ GÜNCELLE
+            </button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-screen="screen1">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Tahmin</div>
+        </a>
+        <a href="#" class="nav-item" data-screen="screen2">
+            <div class="nav-icon">📈</div>
+            <div class="nav-label">Geçmiş</div>
+        </a>
+        <a href="#" class="nav-item" data-screen="screen3">
+            <div class="nav-icon">📡</div>
+            <div class="nav-label">Sensörler</div>
+        </a>
+        <a href="#" class="nav-item" data-screen="screen3">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">Ayarlar</div>
+        </a>
+    </nav>
+
+    <script src="js/app.js"></script>
+    <script src="js/predictions.js"></script>
+    <script src="js/charts.js"></script>
+</body>
+
+</html>

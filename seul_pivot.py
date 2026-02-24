@@ -5,9 +5,7 @@ print("1 Milyon satırlık devasa Seul verisi okunuyor (Bu işlem 10-15 saniye s
 df_seul = pd.read_csv("Measurement_info.csv", sep=";", encoding="cp1254")
 df_sozluk = pd.read_csv("Measurement_item_info.csv", sep=";", encoding="cp1254")
 
-
 df_sozluk = df_sozluk[['Item code', 'Item name']]
-
 
 df_seul = pd.merge(df_seul, df_sozluk, on='Item code', how='left')
 
@@ -26,7 +24,6 @@ def seul_duzelt(val):
         if ay in s:
             s = s.replace(ay, num)
     return s
-
 
 df_seul['Average value'] = df_seul['Average value'].apply(seul_duzelt)
 df_seul['Average value'] = pd.to_numeric(df_seul['Average value'], errors='coerce')

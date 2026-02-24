@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
+import joblib
 
 print("1. TÜBİTAK B Planı Devrede: 1 Milyonluk Seul Verisi Yükleniyor...")
 df = pd.read_csv("SEUL_PIVOT_TEMIZ_VERI.csv")
@@ -13,7 +14,6 @@ df = df.dropna(subset=hedef_kolonlar)
 print(f"Toplam {len(df)} adet tertemiz satır bulundu.\n")
 
 X = df[['SO2', 'NO2', 'CO', 'O3']]
-
 
 y = df['PM10']
 
@@ -26,7 +26,6 @@ model.fit(X_train, y_train)
 
 print("3. Model Test Ediliyor ve Performans Ölçülüyor...\n")
 y_pred = model.predict(X_test)
-
 
 r2 = r2_score(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)
@@ -45,3 +44,6 @@ if r2 >= 0.70:
     print("Risk yönetimi planı kusursuz çalıştı.")
 else:
     print("\nModel skoru gelişti ancak hedef değerin biraz altında.")
+print("Model web arayüzü için kaydediliyor...")
+joblib.dump(model, "hava_kalitesi_modeli.pkl")
+print("Model başarıyla kaydedildi")
