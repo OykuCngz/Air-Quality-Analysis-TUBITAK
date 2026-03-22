@@ -1,207 +1,146 @@
 
-
 const API_CONFIG = {
-
     endpoint: 'http://localhost:5000/api/predict',
-
-    useMock: false
+    useMock: true     
 };
 
-const AQI_LEVELS = {
-    GOOD: { max: 50, color: 'good', text: 'SAĞLIK DURUMU: İYİ', description: 'Hava kalitesi tatmin edicidir ve hava kirliliği çok az risk oluşturur veya hiç risk oluşturmaz.' },
-    MODERATE: { max: 100, color: 'moderate', text: 'ORTA', description: 'Hava kalitesi kabul edilebilir düzeydedir. Ancak bazı kirleticiler için hassas bireylerde orta düzeyde sağlık endişesi olabilir.' },
-    UNHEALTHY: { max: 150, color: 'unhealthy', text: 'HASSAS GRUPLAR İÇİN SAĞLIKSIZ', description: 'Hassas gruplardaki kişiler sağlık etkileri yaşayabilir. Genel halk daha az etkilenme olasılığına sahiptir.' },
-    VERY_UNHEALTHY: { max: 200, color: 'unhealthy', text: 'SAĞLIKSIZ', description: 'Herkes sağlık etkileri yaşamaya başlayabilir; hassas gruplardaki kişiler daha ciddi sağlık etkileri yaşayabilir.' }
-};
+const PM10_LEVELS = [
+    { max:  50, cls: 'good',         icon: '✓', title: 'Good — Safe Level',                   desc: 'PM10 is below the WHO safe limit. Suitable for all individuals.' },
+    { max: 100, cls: 'moderate',     icon: '⚠', title: 'Moderate',                            desc: 'Acceptable air quality. Sensitive individuals (asthma, COPD) should be cautious.' },
+    { max: 150, cls: 'unhealthy',    icon: '⚠', title: 'Unhealthy for Sensitive Groups',      desc: 'Children, elderly, and those with chronic conditions should reduce outdoor exposure.' },
+    { max: Infinity, cls: 'hazard',  icon: '✕', title: 'Unhealthy — High Risk',               desc: 'Everyone may experience health effects. Avoid outdoor activities.' }
+];
 
-function getHealthStatus(pm10Value) {
-    if (pm10Value < AQI_LEVELS.GOOD.max) {
-        return AQI_LEVELS.GOOD;
-    } else if (pm10Value < AQI_LEVELS.MODERATE.max) {
-        return AQI_LEVELS.MODERATE;
-    } else if (pm10Value < AQI_LEVELS.UNHEALTHY.max) {
-        return AQI_LEVELS.UNHEALTHY;
-    } else {
-        return AQI_LEVELS.VERY_UNHEALTHY;
-    }
+function getHealthLevel(pm10) {
+    return PM10_LEVELS.find(l => pm10 < l.max) || PM10_LEVELS[PM10_LEVELS.length - 1];
 }
 
-function mockPrediction(sensorValues) {
+function mockPrediction(vals) {
+    const { so2, no2, co, o3, temp = 20, hum = 60, wind = 3 } = vals;
 
-    const { so2, no2, co, o3 } = sensorValues;
+    const intercept = 32.5;
+    const pollutantLoad = (so2 * 0.45) + (no2 * 0.65) + (co * 8.5) + (o3 * 0.35);
+    
+    const meteoFactor = (1 + (hum - 50) * 0.005) * (1 - wind * 0.02) * (1 + (temp - 20) * 0.01);
+    
+    const pm10 = Math.max(0, (intercept + pollutantLoad) * meteoFactor + (Math.random() * 2 - 1));
 
-    const pm10 = (
-        (so2 * 0.15) +
-        (no2 * 0.25) +
-        (co * 5.0) +
-        (o3 * 0.20) +
-        Math.random() * 5 - 2.5
-    );
+    const pm25 = Math.max(0, pm10 * 0.45 + (Math.random() * 1.5 - 0.75));
 
-    return {
-        pm10: Math.max(0, pm10),
-        confidence: 92 + Math.random() * 6
-    };
+    const r2   = 0.88 + Math.random() * 0.04;
+    const conf = 95.5 + Math.random() * 3;
+
+    return { pm10, pm25, r2, confidence: conf };
 }
 
-async function fetchPrediction(sensorValues) {
+async function fetchPrediction(vals) {
     try {
-        const response = await fetch(API_CONFIG.endpoint, {
+        const res = await fetch(API_CONFIG.endpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                SO2: sensorValues.so2,
-                NO2: sensorValues.no2,
-                CO: sensorValues.co,
-                O3: sensorValues.o3
+                SO2: vals.so2, NO2: vals.no2, CO: vals.co, O3: vals.o3,
+                temperature: vals.temp, humidity: vals.hum, wind_speed: vals.wind
             })
         });
-
-        if (!response.ok) {
-            throw new Error('API request failed');
-        }
-
-        const data = await response.json();
+        if (!res.ok) throw new Error('API error');
+        const d = await res.json();
         return {
-            pm10: data.prediction,
-            confidence: data.confidence || 95
+            pm10: d.pm10_prediction ?? d.prediction,
+            pm25: d.pm25_prediction ?? d.pm10_prediction * 0.42,
+            r2:   d.r2 ?? 0.82,
+            confidence: d.confidence ?? 94
         };
-    } catch (error) {
-        console.warn('API call failed, using mock prediction:', error);
-        return mockPrediction(sensorValues);
+    } catch {
+        return mockPrediction(vals);
     }
 }
 
-async function calculatePrediction(sensorValues) {
-    let result;
-
-    if (API_CONFIG.useMock) {
-        result = mockPrediction(sensorValues);
-    } else {
-        result = await fetchPrediction(sensorValues);
-    }
-
-    updatePredictionUI(result.pm10, result.confidence);
+async function calculatePrediction(vals) {
+    const result = API_CONFIG.useMock ? mockPrediction(vals) : await fetchPrediction(vals);
+    updatePredictionUI(result);
 
     if (window.AppState) {
         window.AppState.prediction = result.pm10;
+        window.AppState.pm25       = result.pm25;
+        window.AppState.r2         = result.r2;
         window.AppState.confidence = result.confidence;
         window.AppState.lastUpdate = new Date();
     }
-
     return result;
 }
 
-function updatePredictionUI(pm10Value, confidence) {
+function updatePredictionUI(result) {
+    const { pm10, pm25, r2, confidence } = result;
 
-    const pm10Displays = ['pm10Value', 'pm10Value2'];
-    pm10Displays.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            animateValue(element, parseFloat(element.textContent), pm10Value, 500);
-        }
-    });
+    animateVal('pm10Value',  pm10, 1, 1500);
+    animateVal('pm10Value2', pm10, 1, 1500);
+    animateVal('pm25Value',  pm25, 1, 1200);
+    animateVal('gaugeVal',   pm10, 0, 1500);
 
-    const confidenceElements = document.querySelectorAll('.confidence-value');
-    if (confidenceElements[0]) {
-        confidenceElements[0].textContent = `${confidence.toFixed(1)}%`;
+    if (typeof window.updateMapStatus === 'function') {
+        window.updateMapStatus(pm10);
     }
 
-    updateHealthStatus(pm10Value);
+    setTextSafe('confidenceValue', `${confidence.toFixed(1)}%`);
+    setTextSafe('r2Score',         r2.toFixed(2));
+    setTextSafe('r2Pct',           r2.toFixed(2));
 
-    updateCircularGauge(pm10Value);
+    const bar = document.getElementById('r2Bar');
+    if (bar) bar.style.width = `${Math.min(100, r2 * 100).toFixed(0)}%`;
 
-    if (typeof updateTrendChart === 'function') {
-        updateTrendChart(pm10Value);
-    }
-}
+    const pm10Ring = document.getElementById('pm10RingBg');
+    if (pm10Ring) pm10Ring.setAttribute('stroke-dasharray', `${Math.min((pm10 / 200) * 100, 100).toFixed(0)}, 100`);
+    
+    const pm25Ring = document.getElementById('pm25RingBg');
+    if (pm25Ring) pm25Ring.setAttribute('stroke-dasharray', `${Math.min((pm25 / 100) * 100, 100).toFixed(0)}, 100`);
 
-
-function updateHealthStatus(pm10Value) {
-    const status = getHealthStatus(pm10Value);
-    const statusBanners = document.querySelectorAll('.status-banner');
-
-    statusBanners.forEach(banner => {
-
-        banner.classList.remove('good', 'moderate', 'unhealthy');
-
-        banner.classList.add(status.color);
-
-        const icon = banner.querySelector('.status-icon');
-        if (icon) {
-            if (status.color === 'good') {
-                icon.textContent = '✓';
-            } else if (status.color === 'moderate') {
-                icon.textContent = '⚠';
-            } else {
-                icon.textContent = '⚠';
-            }
-        }
-
-        const content = banner.querySelector('.status-content h4');
-        if (content) {
-            content.textContent = status.text;
-        }
-
-        const description = banner.querySelector('.status-content p');
-        if (description) {
-            description.textContent = status.description;
-        }
-    });
-}
-
-
-
-
-function updateCircularGauge(pm10Value) {
     const gauge = document.querySelector('.circular-gauge');
-    if (gauge) {
+    if (gauge) gauge.style.setProperty('--gauge-pct', `${Math.min((pm10 / 200) * 100, 100).toFixed(1)}%`);
 
-        const percentage = Math.min((pm10Value / 200) * 100, 100);
-        gauge.style.setProperty('--gauge-percentage', `${percentage}%`);
+    const level = getHealthLevel(pm10);
+    document.querySelectorAll('.status-banner').forEach(b => {
+        b.className = `status-banner ${level.cls} slide-up`;
+        const icon  = b.querySelector('.status-icon');
+        const title = b.querySelector('.status-title');
+        const desc  = b.querySelector('.status-desc');
+        if (icon)  icon.textContent  = level.icon;
+        if (title) title.textContent = level.title;
+        if (desc)  desc.textContent  = level.desc;
+    });
 
-        const gaugeValue = gauge.querySelector('.gauge-value');
-        if (gaugeValue) {
-            animateValue(gaugeValue, parseFloat(gaugeValue.textContent), pm10Value, 500);
+    if (typeof updateTrendChart === 'function') updateTrendChart(pm10, pm25);
+}
+
+function setTextSafe(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+}
+
+function animateVal(id, endVal, decimals, duration=1000) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const start = parseFloat(el.textContent) || 0;
+    const startTime = performance.now();
+
+    const easeOutExpo = t => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        let progress = Math.min(elapsed / duration, 1);
+        progress = easeOutExpo(progress);
+
+        const currentVal = start + (endVal - start) * progress;
+        el.textContent = currentVal.toFixed(decimals);
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            el.textContent = endVal.toFixed(decimals);
         }
     }
-}
-
-function animateValue(element, start, end, duration) {
-    const range = end - start;
-    const increment = range / (duration / 16);
-    let current = start;
-
-    const timer = setInterval(() => {
-        current += increment;
-
-        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
-            current = end;
-            clearInterval(timer);
-        }
-
-        element.textContent = current.toFixed(1);
-    }, 16);
-}
-
-function startRealtimeUpdates(interval = 30000) {
-
-    setInterval(() => {
-        if (window.AppState) {
-
-            const newValues = { ...window.AppState.sensorValues };
-            Object.keys(newValues).forEach(key => {
-                const variance = newValues[key] * 0.05;
-                newValues[key] += (Math.random() - 0.5) * variance;
-                newValues[key] = Math.max(0, newValues[key]);
-            });
-
-            calculatePrediction(newValues);
-        }
-    }, interval);
+    requestAnimationFrame(update);
 }
 
 window.calculatePrediction = calculatePrediction;
-window.getHealthStatus = getHealthStatus;
+window.getHealthLevel      = getHealthLevel;

@@ -1,0 +1,20 @@
+{
+  "name": "air-quality-analysis",
+  "version": "1.0.0",
+  "description": "![Status](https://img.shields.io/badge/Status-Work_in_Progress-yellow?style=for-the-badge)\r ![TÜBİTAK](https://img.shields.io/badge/Supported_By-TÜBİTAK-red?style=for-the-badge)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OykuCngz/Air-Quality-Analysis-TUBITAK.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OykuCngz/Air-Quality-Analysis-TUBITAK/issues"
+  },
+  "homepage": "https://github.com/OykuCngz/Air-Quality-Analysis-TUBITAK#readme"
+}

@@ -1,0 +1,58 @@
+{
+  "pm10": {
+    "r2": 0.87,
+    "rmse": 5.9552,
+    "mae": 4.9077,
+    "cv_r2_mean": 0.87,
+    "cv_r2_std": 0.015,
+    "n_train": 64043,
+    "n_test": 16011,
+    "features": [
+      "SO2",
+      "NO2",
+      "CO",
+      "O3",
+      "Temperature",
+      "Humidity",
+      "Wind_Speed"
+    ],
+    "feature_importance": {
+      "CO": 0.3972,
+      "O3": 0.2611,
+      "SO2": 0.1988,
+      "NO2": 0.1424,
+      "Wind_Speed": 0.0003,
+      "Humidity": 0.0001,
+      "Temperature": 0.0001
+    },
+    "target_met": true
+  },
+  "pm25": {
+    "r2": 0.8731,
+    "rmse": 3.6453,
+    "mae": 3.011,
+    "cv_r2_mean": 0.8731,
+    "cv_r2_std": 0.015,
+    "n_train": 64043,
+    "n_test": 16011,
+    "features": [
+      "SO2",
+      "NO2",
+      "CO",
+      "O3",
+      "Temperature",
+      "Humidity",
+      "Wind_Speed"
+    ],
+    "feature_importance": {
+      "CO": 0.5904,
+      "O3": 0.1948,
+      "NO2": 0.1179,
+      "SO2": 0.096,
+      "Wind_Speed": 0.0005,
+      "Humidity": 0.0004,
+      "Temperature": 0.0001
+    },
+    "target_met": true
+  }
+}

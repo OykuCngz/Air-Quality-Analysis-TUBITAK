@@ -1,257 +1,209 @@
+/* ─────────────────────────────────────
+   AQI Calibrator – Charts
+   TÜBİTAK 2209-A | PM10 + PM2.5 dual trend
+───────────────────────────────────── */
 
-const CHART_CONFIG = {
-    colors: {
-        primary: '#1e90ff',
-        primaryLight: '#4da6ff',
-        gradient: {
-            start: 'rgba(30, 144, 255, 0.3)',
-            end: 'rgba(30, 144, 255, 0.05)'
-        },
-        grid: 'rgba(255, 255, 255, 0.1)',
-        text: '#a0aec0'
-    },
-    font: {
-        family: 'Inter, sans-serif',
-        size: 11
-    }
+const CC = {
+    pm10:      '#6366f1',
+    pm10Fill0: 'rgba(99,102,241,0.35)',
+    pm10Fill1: 'rgba(99,102,241,0)',
+    pm25:      '#0ea5e9',
+    pm25Fill0: 'rgba(14,165,233,0.20)',
+    pm25Fill1: 'rgba(14,165,233,0)',
+    grid:      'rgba(255,255,255,0.05)',
+    text:      '#64748b',
+    tooltip:   'rgba(10,15,28,0.95)',
+    font:      "'Inter', sans-serif",
+    fontSize:  10
 };
 
-let trendChart = null;
-let historicalChart = null;
-let liveTrendData = Array(10).fill(42.5);
+let trendChart     = null;
+let historicalChart= null;
+let pm10Series     = [];
+let pm25Series     = [];
 
-
-function generateTrendData(points = 10) {
-    const data = [];
-    const labels = [];
+/* ── Zaman etiketleri ─── */
+function makeTimeLabels(n = 12, intervalMin = 10) {
     const now = new Date();
-
-    for (let i = points - 1; i >= 0; i--) {
-        const time = new Date(now.getTime() - i * 10 * 60 * 1000);
-        const label = i === 0 ? 'ŞİMDİ' : `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`;
-        labels.push(label);
-
-        const baseValue = 40 + Math.sin(i / 2) * 10;
-        data.push(Math.max(0, baseValue));
-    }
-
-    return { labels, data };
+    return Array.from({ length: n }, (_, i) => {
+        if (i === n - 1) return 'ŞİMDİ';
+        const t = new Date(now - (n - 1 - i) * intervalMin * 60000);
+        return `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
+    });
 }
 
-
-function generateBarData(points = 10) {
-    const data = [];
-    for (let i = 0; i < points; i++) {
-        data.push(30 + Math.random() * 40);
-    }
-    return data;
+/* ── Başlangıç verisi ─── */
+function initSeedData(n = 12) {
+    pm10Series = Array.from({ length: n }, (_, i) => Math.max(10, 38 + Math.sin(i / 2.5) * 12 + Math.random() * 6));
+    pm25Series = pm10Series.map(v => Math.max(4, v * 0.42 + (Math.random() - 0.5) * 3));
 }
 
+/* ── Gradyan yardımcısı ─── */
+function makeGradient(ctx, h, c0, c1) {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, c0);
+    g.addColorStop(1, c1);
+    return g;
+}
+
+/* ── Ortak chart seçenekleri ─── */
+function baseOpts(extra = {}) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 500 },
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                align: 'end',
+                labels: {
+                    color: CC.text,
+                    font: { family: CC.font, size: 10 },
+                    boxWidth: 8, boxHeight: 8,
+                    padding: 12,
+                    usePointStyle: true
+                }
+            },
+            tooltip: {
+                backgroundColor: CC.tooltip,
+                titleColor: '#fff',
+                bodyColor: '#94a3b8',
+                borderColor: 'rgba(255,255,255,0.1)',
+                borderWidth: 1,
+                padding: 12,
+                callbacks: {
+                    label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} µg/m³`
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                border: { display: false },
+                ticks: { color: CC.text, font: { family: CC.font, size: CC.fontSize }, maxRotation: 0 }
+            },
+            y: {
+                grid: { color: CC.grid },
+                border: { display: false },
+                beginAtZero: true,
+                ticks: { color: CC.text, font: { family: CC.font, size: CC.fontSize }, callback: v => `${v}` }
+            },
+            ...extra
+        }
+    };
+}
+
+/* ── Trend Chart (Ekran 1) ─── */
 function initTrendChart() {
     const canvas = document.getElementById('trendChart');
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const { labels, data } = generateTrendData(10);
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-    gradient.addColorStop(0, CHART_CONFIG.colors.gradient.start);
-    gradient.addColorStop(1, CHART_CONFIG.colors.gradient.end);
+    const h   = canvas.parentElement.offsetHeight || 160;
+    const lbl = makeTimeLabels(12);
+    initSeedData(12);
 
     trendChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
-            datasets: [{
-                label: 'PM10 Prediction',
-                data: data,
-                borderColor: CHART_CONFIG.colors.primary,
-                backgroundColor: gradient,
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointHoverBackgroundColor: CHART_CONFIG.colors.primary,
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 2
-            }]
+            labels: lbl,
+            datasets: [
+                {
+                    label: 'PM10',
+                    data: [...pm10Series],
+                    borderColor:     CC.pm10,
+                    backgroundColor: makeGradient(ctx, h, CC.pm10Fill0, CC.pm10Fill1),
+                    borderWidth: 2, fill: true, tension: 0.4,
+                    pointRadius: 0, pointHoverRadius: 5,
+                    pointHoverBackgroundColor: CC.pm10,
+                    pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2
+                },
+                {
+                    label: 'PM2.5',
+                    data: [...pm25Series],
+                    borderColor:     CC.pm25,
+                    backgroundColor: makeGradient(ctx, h, CC.pm25Fill0, CC.pm25Fill1),
+                    borderWidth: 2, fill: true, tension: 0.4,
+                    borderDash: [4, 3],
+                    pointRadius: 0, pointHoverRadius: 5,
+                    pointHoverBackgroundColor: CC.pm25,
+                    pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2
+                }
+            ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(21, 27, 39, 0.95)',
-                    titleColor: '#fff',
-                    bodyColor: '#a0aec0',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1,
-                    padding: 12,
-                    displayColors: false,
-                    callbacks: {
-                        label: (context) => `PM10: ${context.parsed.y.toFixed(1)} µg/m³`
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        color: CHART_CONFIG.colors.text,
-                        font: {
-                            family: CHART_CONFIG.font.family,
-                            size: CHART_CONFIG.font.size
-                        },
-                        maxRotation: 0
-                    },
-                    border: {
-                        display: false
-                    }
-                },
-                y: {
-                    grid: {
-                        color: CHART_CONFIG.colors.grid,
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: CHART_CONFIG.colors.text,
-                        font: {
-                            family: CHART_CONFIG.font.family,
-                            size: CHART_CONFIG.font.size
-                        },
-                        callback: (value) => `${value}`
-                    },
-                    border: {
-                        display: false
-                    },
-                    beginAtZero: true
-                }
-            }
-        }
+        options: baseOpts()
     });
 }
 
+/* ── Historical Chart (Ekran 2) ─── */
 function initHistoricalChart() {
     const canvas = document.getElementById('historicalChart');
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    const data = generateBarData(10);
-    const labels = Array(10).fill('').map((_, i) => i === 9 ? 'NOW' : '');
+    const ctx  = canvas.getContext('2d');
+    const n    = 24;
+    const lbl  = makeTimeLabels(n, 60);              // 24 saatlik
+    const d10  = Array.from({ length: n }, (_, i) => Math.max(10, 40 + Math.sin(i / 4) * 18 + Math.random() * 8));
+    const d25  = d10.map(v => Math.max(4, v * 0.42 + (Math.random() - 0.5) * 4));
 
     historicalChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels,
-            datasets: [{
-                label: 'PM10 Historical',
-                data: data,
-                backgroundColor: data.map((value, index) => {
-                    if (index === data.length - 1) {
-                        return CHART_CONFIG.colors.primary;
-                    }
-                    return CHART_CONFIG.colors.gradient.start;
-                }),
-                borderRadius: 4,
-                borderSkipped: false
-            }]
+            labels: lbl,
+            datasets: [
+                {
+                    label: 'PM10',
+                    data: d10,
+                    backgroundColor: d10.map((_, i) => i === n - 1 ? CC.pm10 : 'rgba(99,102,241,0.35)'),
+                    borderRadius: 4,
+                    borderSkipped: false,
+                    barPercentage: 0.55
+                },
+                {
+                    label: 'PM2.5',
+                    data: d25,
+                    backgroundColor: d25.map((_, i) => i === n - 1 ? CC.pm25 : 'rgba(14,165,233,0.25)'),
+                    borderRadius: 4,
+                    borderSkipped: false,
+                    barPercentage: 0.55
+                }
+            ]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(21, 27, 39, 0.95)',
-                    titleColor: '#fff',
-                    bodyColor: '#a0aec0',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1,
-                    padding: 12,
-                    displayColors: false,
-                    callbacks: {
-                        title: () => '',
-                        label: (context) => `${context.parsed.y.toFixed(1)} µg/m³`
-                    }
-                }
-            },
+            ...baseOpts(),
             scales: {
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        color: CHART_CONFIG.colors.text,
-                        font: {
-                            family: CHART_CONFIG.font.family,
-                            size: CHART_CONFIG.font.size
-                        }
-                    },
-                    border: {
-                        display: false
-                    }
-                },
-                y: {
-                    display: false,
-                    beginAtZero: true
-                }
+                x: { grid: { display: false }, border: { display: false },
+                     ticks: { color: CC.text, font: { family: CC.font, size: CC.fontSize }, maxTicksLimit: 8, maxRotation: 0 } },
+                y: { grid: { color: CC.grid }, border: { display: false }, beginAtZero: true,
+                     ticks: { color: CC.text, font: { family: CC.font, size: CC.fontSize }, callback: v => `${v}` } }
             }
         }
     });
 }
 
-function updateTrendChart(newPrediction) {
+/* ── Güncelleme (tahmin değiştiğinde) ─── */
+function updateTrendChart(newPm10, newPm25) {
     if (!trendChart) return;
 
-    liveTrendData.shift();
-    liveTrendData.push(newPrediction);
+    pm10Series.shift(); pm10Series.push(newPm10 ?? 40);
+    pm25Series.shift(); pm25Series.push(newPm25 ?? (newPm10 ?? 40) * 0.42);
 
-    const { labels } = generateTrendData(10);
-    trendChart.data.labels = labels;
-
-    trendChart.data.datasets[0].data = [...liveTrendData];
-    trendChart.update();
+    trendChart.data.labels = makeTimeLabels(12);
+    trendChart.data.datasets[0].data = [...pm10Series];
+    trendChart.data.datasets[1].data = [...pm25Series];
+    trendChart.update('active');
 }
 
-
-
-function updateHistoricalChart(newData) {
-    if (!historicalChart) return;
-
-    historicalChart.data.datasets[0].data = newData;
-    historicalChart.update('none');
-}
-
+/* ── Init ─── */
 function initCharts() {
-    console.log('📊 Initializing charts...');
+    console.log('📊 Chart motoru başlatılıyor...');
     setTimeout(() => {
         initTrendChart();
         initHistoricalChart();
-    }, 100);
+    }, 120);
 }
 
-function startChartUpdates(interval = 60000) {
-    setInterval(() => {
-        const { data } = generateTrendData(10);
-        updateTrendChart(data);
-
-        const historicalData = generateBarData(10);
-        updateHistoricalChart(historicalData);
-    }, interval);
-}
-
-window.initCharts = initCharts;
-window.updateTrendChart = updateTrendChart;
-window.updateHistoricalChart = updateHistoricalChart;
+window.initCharts          = initCharts;
+window.updateTrendChart    = updateTrendChart;
