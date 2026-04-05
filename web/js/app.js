@@ -750,24 +750,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (profileBtn && logoutDropdown) {
-        profileBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            logoutDropdown.style.display = logoutDropdown.style.display === 'none' ? 'block' : 'none';
+    if (doLogoutBtn) {
+        doLogoutBtn.addEventListener('click', () => {
+            if(loginPassword) loginPassword.value = '';
+            if(loginOverlay) {
+                loginOverlay.style.display = 'flex';
+                setTimeout(() => { loginOverlay.style.opacity = '1'; }, 10);
+            }
         });
-
-        document.body.addEventListener('click', () => {
-            logoutDropdown.style.display = 'none';
-        });
-
-        if (doLogoutBtn) {
-            doLogoutBtn.addEventListener('click', () => {
-                if(loginPassword) loginPassword.value = '';
-                if(loginOverlay) {
-                    loginOverlay.style.display = 'flex';
-                    setTimeout(() => { loginOverlay.style.opacity = '1'; }, 10);
-                }
-            });
-        }
     }
 });

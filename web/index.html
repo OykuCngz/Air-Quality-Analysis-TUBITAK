@@ -81,22 +81,22 @@
                 </svg>
                 <input type="text" id="stationSearch" placeholder="Search...">
             </div>
-            <button class="icon-nav-btn" id="exportBtn" title="Export Dashboard PDF">
+            <button class="icon-nav-btn" id="exportBtn" title="Export Dashboard PDF" style="margin-right:16px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>
-            <div class="profile-area" id="profileBtn" style="cursor:pointer; position:relative;">
+            <div class="profile-area">
                 <div class="profile-info">
-                    <span class="user-name" style="color:#fff;">Lead Researcher</span>
-                    <span class="user-role">AUTHORIZED</span>
+                    <span class="user-name" style="color:#fff; font-size:0.9rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">Öykü Cengiz</span>
+                    <span class="user-role" style="color:#14b8a6;">PROJECT LEAD (2209-A)</span>
                 </div>
-                <div class="avatar"><img src="https://ui-avatars.com/api/?name=O+C&background=0e1528&color=14b8a6" alt="Avatar"></div>
+                <div class="avatar" style="margin-right: 8px;"><img src="https://ui-avatars.com/api/?name=O+C&background=0e1528&color=14b8a6" alt="Avatar"></div>
                 
-                <!-- Logout Dropdown -->
-                <div id="logoutDropdown" style="display:none; position:absolute; top:110%; right:0; background:#131a2a; border:1px solid #1f2937; padding:8px; border-radius:8px; box-shadow:0 5px 20px rgba(0,0,0,0.5); width:150px; text-align:center;">
-                    <div id="doLogoutBtn" style="color:#f87171; font-size:0.85rem; font-weight:600; padding:10px; border-radius:6px; cursor:pointer;" onmouseover="this.style.background='rgba(248,113,113,0.1)'" onmouseout="this.style.background='transparent'">
-                        Disconnect / Log Out
-                    </div>
-                </div>
+                <button id="doLogoutBtn" title="System Logout" style="cursor:pointer; color:#f87171; background:rgba(248,113,113,0.05); padding:8px; border-radius:50%; display:flex; align-items:center; justify-content:center; width:40px; height:40px; transition:0.3s; border:1px solid rgba(248,113,113,0.2);" onmouseover="this.style.background='rgba(248,113,113,0.2)'; this.style.boxShadow='0 0 15px rgba(248,113,113,0.5)';" onmouseout="this.style.background='rgba(248,113,113,0.05)'; this.style.boxShadow='none';">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                    </svg>
+                </button>
             </div>
         </div>
     </header>
