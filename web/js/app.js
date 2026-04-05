@@ -737,9 +737,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (val === 'tubitak' || val === 'admin') {
                 loginOverlay.style.opacity = '0';
                 setTimeout(() => { loginOverlay.style.display = 'none'; }, 500);
-                showToast('✅ Authorization Verified');
+                showToast('Authorization Verified');
             } else {
-                loginError.textContent = '❌ Invalid Access Code';
+                loginError.textContent = 'ACCESS DENIED: Invalid Security Code';
                 setTimeout(() => { loginError.textContent = ''; }, 2000);
             }
         };
