@@ -447,7 +447,7 @@ function initButtons() {
             if (typeof calculatePrediction === 'function') {
                 calculatePrediction({ ...AppState.sensorValues, ...AppState.meteo });
             }
-            showToast('✅ Tahmin güncellendi');
+            showToast('Sistem: Tahmin başarıyla güncellendi');
         });
     });
 
@@ -496,11 +496,11 @@ function initButtons() {
                 const dist = DISTRICTS[query];
                 
                 if (!dist) {
-                    showToast('❌ İstasyon blunamadı. Ekli olanlar: Kadıköy, Şişli, Beşiktaş, Bakırköy, Üsküdar');
+                    showToast('Bağlantı Hatası: İstasyon bulunamadı. Lütfen geçerli bir ilçe giriniz.');
                     return;
                 }
                 
-                showToast(`📡 Bağlanılıyor: ${dist.name} Uzay İstasyonu...`);
+                showToast(`Uydu bağlantısı kuruluyor: ${dist.name} Koordinatları...`);
                 
                 // Update Leaflet Map dynamically
                 if (typeof map !== 'undefined' && kandilliMarker && kandilliLabel) {
@@ -543,12 +543,12 @@ function initButtons() {
                         // Calculate Prediction immediately using the backend
                         if (typeof calculatePrediction === 'function') {
                             calculatePrediction({ ...AppState.sensorValues, ...AppState.meteo });
-                            setTimeout(() => { showToast(`✅ ${dist.name} verileri başarıyla asimile edildi.`); }, 1500);
+                            setTimeout(() => { showToast(`Sistem Hazır: ${dist.name} hava kalitesi verileri asimile edildi.`); }, 1500);
                         }
                     }
                 } catch(err) {
                     console.error('AOI Fetch Error', err);
-                    showToast('⚠️ API Bağlantı Hatası: Canlı veri çekilemedi!');
+                    showToast('Telemetri Hatası: Canlı veri API kaynağına ulaşılamadı.');
                 }
             }
         });
