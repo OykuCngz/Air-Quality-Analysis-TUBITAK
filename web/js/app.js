@@ -86,7 +86,7 @@ function debouncedUpdate() {
             calculatePrediction({ ...AppState.sensorValues, ...AppState.meteo });
             AppState.lastUpdate = new Date();
         }
-    }, 500);
+    }, 200);
 }
 
 function initButtons() {

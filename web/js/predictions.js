@@ -34,15 +34,21 @@ function mockPrediction(vals) {
 }
 
 async function fetchPrediction(vals) {
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), 2000) : null;
     try {
-        const res = await fetch(API_CONFIG.endpoint, {
+        const reqOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 SO2: vals.so2, NO2: vals.no2, CO: vals.co, O3: vals.o3,
                 temperature: vals.temp, humidity: vals.hum, wind_speed: vals.wind
             })
-        });
+        };
+        if (controller) reqOptions.signal = controller.signal;
+
+        const res = await fetch(API_CONFIG.endpoint, reqOptions);
+        if (timeoutId) clearTimeout(timeoutId);
         if (!res.ok) throw new Error('API error');
         const d = await res.json();
         return {
