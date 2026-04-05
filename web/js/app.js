@@ -472,6 +472,87 @@ function initButtons() {
             if (e.target === aboutModal) closeAboutModal();
         });
     }
+
+    // --- SATELLITE SEARCH API INTEGRATION ---
+    const stationSearch = document.getElementById('stationSearch');
+    if (stationSearch) {
+        const DISTRICTS = {
+            'kadıköy': { lat: 40.9900, lon: 29.0200, name: 'Kadıköy' },
+            'kadikoy': { lat: 40.9900, lon: 29.0200, name: 'Kadıköy' },
+            'beşiktaş': { lat: 41.0422, lon: 29.0083, name: 'Beşiktaş' },
+            'besiktas': { lat: 41.0422, lon: 29.0083, name: 'Beşiktaş' },
+            'şişli': { lat: 41.0600, lon: 28.9800, name: 'Şişli' },
+            'sisli': { lat: 41.0600, lon: 28.9800, name: 'Şişli' },
+            'bakırköy': { lat: 40.9800, lon: 28.8700, name: 'Bakırköy' },
+            'bakirkoy': { lat: 40.9800, lon: 28.8700, name: 'Bakırköy' },
+            'kandilli': { lat: 41.0650, lon: 29.0570, name: 'Kandilli' },
+            'üsküdar': { lat: 41.0200, lon: 29.0100, name: 'Üsküdar' },
+            'uskudar': { lat: 41.0200, lon: 29.0100, name: 'Üsküdar' }
+        };
+
+        stationSearch.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value.toLowerCase().trim();
+                const dist = DISTRICTS[query];
+                
+                if (!dist) {
+                    showToast('❌ İstasyon blunamadı. Ekli olanlar: Kadıköy, Şişli, Beşiktaş, Bakırköy, Üsküdar');
+                    return;
+                }
+                
+                showToast(`📡 Bağlanılıyor: ${dist.name} Uzay İstasyonu...`);
+                
+                // Update Leaflet Map dynamically
+                if (typeof map !== 'undefined' && kandilliMarker && kandilliLabel) {
+                    const coords = [dist.lat, dist.lon];
+                    map.setView(coords, 13, { animate: true, duration: 1.5 });
+                    kandilliMarker.setLatLng(coords);
+                    kandilliLabel.setLatLng(coords);
+                    const lTitle = document.querySelector('.l-title');
+                    if (lTitle) lTitle.textContent = dist.name.toUpperCase() + ' ST.';
+                }
+
+                // Fetch real Open-Meteo AQI data exactly for the searched district lat/lon
+                try {
+                    const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${dist.lat}&longitude=${dist.lon}&current=carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
+                    const res = await fetch(aqUrl);
+                    const data = await res.json();
+                    
+                    if (data.current) {
+                        const so2 = data.current.sulphur_dioxide || 2.0;
+                        const no2 = data.current.nitrogen_dioxide || 25.0;
+                        const co  = (data.current.carbon_monoxide || 300) / 1000.0;
+                        const o3  = data.current.ozone || 45.0;
+                        
+                        // Set JS state and UI slider visuals automatically
+                        const vals = { so2, no2, co, o3 };
+                        Object.keys(vals).forEach(k => {
+                            AppState.sensorValues[k] = vals[k];
+                            const s = document.getElementById(`${k}Slider`);
+                            const d = document.getElementById(`${k}Display`);
+                            const f = document.getElementById(`${k}Fill`);
+                            if(s) {
+                                s.value = vals[k];
+                                const min = parseFloat(s.min);
+                                const max = parseFloat(s.max);
+                                if(f) f.style.width = (((vals[k] - min)/(max - min)) * 100) + '%';
+                            }
+                            if(d) d.textContent = (k === 'co') ? vals[k].toFixed(2) : Math.round(vals[k]);
+                        });
+
+                        // Calculate Prediction immediately using the backend
+                        if (typeof calculatePrediction === 'function') {
+                            calculatePrediction({ ...AppState.sensorValues, ...AppState.meteo });
+                            setTimeout(() => { showToast(`✅ ${dist.name} verileri başarıyla asimile edildi.`); }, 1500);
+                        }
+                    }
+                } catch(err) {
+                    console.error('AOI Fetch Error', err);
+                    showToast('⚠️ API Bağlantı Hatası: Canlı veri çekilemedi!');
+                }
+            }
+        });
+    }
 }
 
 function resetSensorValues() {
