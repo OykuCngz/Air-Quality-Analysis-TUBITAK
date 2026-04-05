@@ -8,7 +8,8 @@ const AppState = {
     r2:           0.84,
     confidence:   95.4,
     datasetRows:  8760,
-    lastUpdate:   new Date()
+    lastUpdate:   new Date(),
+    activeStation: 'Kandilli'
 };
 
 function initNavigation() {
@@ -294,11 +295,11 @@ function initButtons() {
 
 <div class="cover-title">
   <h1>Air Quality Analysis Report</h1>
-  <p>Kandilli Reference Station · Istanbul · Random Forest ML Model · TUBITAK 2209-A</p>
+  <p>${AppState.activeStation} Station · Istanbul · Random Forest ML Model · TUBITAK 2209-A</p>
 </div>
 
 <div class="station-bar">
-  <span>📍 Kandilli Observatory, Istanbul</span>
+  <span>📍 ${AppState.activeStation} Station, Istanbul</span>
   <span>🕒 ${dateStr} ${timeStr}</span>
   <span>🤖 Random Forest · LSTM Inference Engine</span>
   <span>📊 160,107 Data Rows</span>
@@ -372,7 +373,7 @@ function initButtons() {
           <tr><td>Confidence</td><td class="val">${conf}</td><td>Inference bounds</td></tr>
           <tr><td>Data Rows</td><td class="val">160,107</td><td>Total training set</td></tr>
           <tr><td>Model</td><td class="val">Random Forest</td><td>Ensemble learning</td></tr>
-          <tr><td>Station</td><td class="val">Kandilli</td><td>Reference sensor</td></tr>
+          <tr><td>Station</td><td class="val">${AppState.activeStation}</td><td>Monitored node</td></tr>
         </tbody>
       </table>
     </div>
@@ -384,7 +385,7 @@ function initButtons() {
   <div class="chart-box">
     <div class="chart-header">
       <h3>24-Hour PM10 / PM2.5 Forecast</h3>
-      <p>LSTM based temporal analysis · Kandilli Observatory data</p>
+      <p>LSTM based temporal analysis · ${AppState.activeStation} Station data</p>
     </div>
     <img src="${chartImgSrc}" alt="Trend Chart" />
   </div>
@@ -398,7 +399,7 @@ function initButtons() {
     <strong>AeroPredict ML</strong> · TUBITAK 2209-A Research Project · Precision Lab, Air Quality
   </div>
   <div>
-    Report Date: ${dateStr} ${timeStr} · Kandilli Station · system: ONLINE
+    Report Date: ${dateStr} ${timeStr} · ${AppState.activeStation} Station · system: ONLINE
   </div>
 </div>
 
@@ -510,6 +511,7 @@ function initButtons() {
                     kandilliLabel.setLatLng(coords);
                     const lTitle = document.querySelector('.l-title');
                     if (lTitle) lTitle.textContent = dist.name.toUpperCase() + ' ST.';
+                    AppState.activeStation = dist.name;
                 }
 
                 // Fetch real Open-Meteo AQI data exactly for the searched district lat/lon
