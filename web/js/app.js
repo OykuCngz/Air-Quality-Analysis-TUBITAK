@@ -500,7 +500,7 @@ function initButtons() {
                     return;
                 }
                 
-                showToast(`Uydu bağlantısı kuruluyor: ${dist.name} Koordinatları...`);
+                showToast(`Uydu telemetrisi: ${dist.name} frekansına bağlanıldı`);
                 
                 // Update Leaflet Map dynamically
                 if (typeof map !== 'undefined' && kandilliMarker && kandilliLabel) {
