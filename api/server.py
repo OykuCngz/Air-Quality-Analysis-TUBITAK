@@ -22,6 +22,11 @@ import json
 import os
 import shap
 import requests
+import sys
+
+# Windows Türkçe konsol hatasını engellemek için UTF-8 ayarı
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 app = Flask(__name__)
 CORS(app)
@@ -48,7 +53,7 @@ FEATURES = ['SO2', 'NO2', 'CO', 'O3', 'Temperature', 'Humidity', 'Wind_Speed']
 # LOAD MODELS
 # ─────────────────────────────────────
 def load_models():
-    global model_pm10, model_pm25, metrics
+    global model_pm10, model_pm25, metrics, explainer_pm10
 
     # PM10
     if os.path.exists(MODEL_PM10):
