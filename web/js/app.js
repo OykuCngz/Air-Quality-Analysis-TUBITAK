@@ -719,3 +719,55 @@ window.updateMapStatus = function(pm10) {
 
 window.AppState  = AppState;
 window.showToast = showToast;
+
+// --- SECURITY GATEWAY LOGIC ---
+document.addEventListener('DOMContentLoaded', () => {
+    const loginOverlay = document.getElementById('loginOverlay');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginError = document.getElementById('loginError');
+
+    const profileBtn = document.getElementById('profileBtn');
+    const logoutDropdown = document.getElementById('logoutDropdown');
+    const doLogoutBtn = document.getElementById('doLogoutBtn');
+
+    if (loginOverlay && loginBtn) {
+        const attemptLogin = () => {
+            const val = loginPassword.value.toLowerCase().trim();
+            if (val === 'tubitak' || val === 'admin') {
+                loginOverlay.style.opacity = '0';
+                setTimeout(() => { loginOverlay.style.display = 'none'; }, 500);
+                showToast('✅ Authorization Verified');
+            } else {
+                loginError.textContent = '❌ Invalid Access Code';
+                setTimeout(() => { loginError.textContent = ''; }, 2000);
+            }
+        };
+
+        loginBtn.addEventListener('click', attemptLogin);
+        loginPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') attemptLogin();
+        });
+    }
+
+    if (profileBtn && logoutDropdown) {
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            logoutDropdown.style.display = logoutDropdown.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.body.addEventListener('click', () => {
+            logoutDropdown.style.display = 'none';
+        });
+
+        if (doLogoutBtn) {
+            doLogoutBtn.addEventListener('click', () => {
+                if(loginPassword) loginPassword.value = '';
+                if(loginOverlay) {
+                    loginOverlay.style.display = 'flex';
+                    setTimeout(() => { loginOverlay.style.opacity = '1'; }, 10);
+                }
+            });
+        }
+    }
+});
