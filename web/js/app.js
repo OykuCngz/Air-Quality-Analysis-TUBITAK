@@ -511,6 +511,8 @@ function initButtons() {
                     kandilliLabel.setLatLng(coords);
                     const lTitle = document.querySelector('.l-title');
                     if (lTitle) lTitle.textContent = dist.name.toUpperCase() + ' ST.';
+                    const hTitle = document.getElementById('mapLocationSubtitle');
+                    if (hTitle) hTitle.innerHTML = '<span class="pin"></span> ISTANBUL: ' + dist.name.toUpperCase() + ' SATELLITE FEED';
                     AppState.activeStation = dist.name;
                 }
 
@@ -689,11 +691,12 @@ function initMap() {
 
         zoomBtn.addEventListener('click', e => {
             e.preventDefault();
+            const currentC = kandilliMarker ? kandilliMarker.getLatLng() : [41.0650, 29.0570];
             if (map.getZoom() < 8) {
-                map.setView(coords, 14, { animate: true, duration: 0.4 });
+                map.setView(currentC, 14, { animate: true, duration: 0.4 });
                 zoomBtn.innerHTML = iconZoomOut;
             } else {
-                map.setView(coords, 3, { animate: true, duration: 0.4 });
+                map.setView(currentC, 3, { animate: true, duration: 0.4 });
                 zoomBtn.innerHTML = iconZoomIn;
             }
         });
