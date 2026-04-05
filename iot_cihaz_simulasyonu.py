@@ -1,55 +1,60 @@
 import requests
 import time
-import pandas as pd
-import random
 import os
 
 API_URL = "http://localhost:5000/api/predict"
-DATASET_FILE = "fused_training_set.csv"
+# Kandilli / İstanbul Koordinatları
+LATITUDE = 41.0625
+LONGITUDE = 29.0577
+
+OPEN_METEO_AQ_URL = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={LATITUDE}&longitude={LONGITUDE}&current=carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone"
 
 def sensor_similasyonu():
-    print("TÜBİTAK 2209-A - Sensör Veri Simülasyonu (Dataset Tabanlı)")
-    
-    if not os.path.exists(DATASET_FILE):
-        print(f"Hata: {DATASET_FILE} bulunamadı! Lütfen önce 'python data_fusion.py' çalıştırın.")
-        return
-
-    print(f"{DATASET_FILE} yükleniyor...")
-    df = pd.read_csv(DATASET_FILE)
-    
-    # Gereken sütunların olup olmadığını kontrol edelim
-    required_cols = ["SO2", "NO2", "CO", "O3", "Temperature", "Humidity", "Wind_Speed"]
-    available_cols = [c for c in required_cols if c in df.columns]
-    
-    if len(available_cols) == 0:
-        print("Hata: Veri setinde gerekli sütunlar bulunamadı.")
-        return
-
-    print(f"Gerçek veri seti tabanlı simülasyon başlatıldı. Toplam satır: {len(df)}")
+    print("=====================================================")
+    print("  TÜBİTAK 2209-A: SENSÖRSÜZ CANLI VERİ ASİMİLASYONU")
+    print(f"  Lokasyon: İstanbul, Kandilli (Lat: {LATITUDE}, Lon: {LONGITUDE})")
+    print("=====================================================")
     
     while True:
-        # Rastgele bir satır seçelim veya sırayla da gidebilirsiniz.
-        # Burada rastgele bir anlık veri senaryosu canlandırıyoruz.
-        row_idx = random.randint(0, len(df) - 1)
-        row_data = df.iloc[row_idx]
-        
-        sensor_verileri = {}
-        for col in available_cols:
-            sensor_verileri[col] = float(row_data[col])
-            
         try:
+            # 1. İnternetten İstanbul'un o saniyelik GERÇEK hava kirliliği verilerini (Gazlar) çek!
+            res = requests.get(OPEN_METEO_AQ_URL, timeout=5).json()
+            current = res.get("current", {})
+            
+            if not current:
+                print("Hata: Canlı veriler API'den alınamadı.")
+                time.sleep(10)
+                continue
+            
+            # CO μg/m³ cinsinden (Örn: 260) gelir, bizim yapay zeka modelimiz mg/m³ veya ppm civarı eğitildiği için 1000'e böleriz.
+            # SO2, NO2, O3 μg/m³ cinsinden devam edebilir.
+            so2_live = current.get("sulphur_dioxide", 2.0)
+            no2_live = current.get("nitrogen_dioxide", 25.0)
+            co_live  = current.get("carbon_monoxide", 300.0) / 1000.0  
+            o3_live  = current.get("ozone", 45.0)
+            
+            sensor_verileri = {
+                "SO2": round(so2_live, 2),
+                "NO2": round(no2_live, 2),
+                "CO": round(co_live, 3),
+                "O3": round(o3_live, 2)
+            }
+            
+            # 2. Çekilen bu gerçek İstanbul verisini Yapay Zekamıza (server.py) Yolluyoruz.
+            # (Hatırlatma: server.py de gelen bu veriyi görünce gidip Canlı Nem ve Sıcaklık ekleyecek!)
             response = requests.post(API_URL, json=sensor_verileri)
             
             if response.status_code == 200:
                 res_json = response.json()
-                print(f"Satır: {row_idx:^6} | Gönderilen: SO2:{sensor_verileri.get('SO2'):<5.1f} NO2:{sensor_verileri.get('NO2'):<5.1f} | Tahmin (PM10): {res_json.get('pm10_prediction', 'N/A')}")
+                print(f"🌍 CANLI (Kandilli) | Giden: SO2:{sensor_verileri['SO2']} NO2:{sensor_verileri['NO2']} CO:{sensor_verileri['CO']} | Tahmin Edilen PM10: {res_json.get('pm10_prediction', 'N/A')}")
             else:
                 print(f"Sunucu hatası: {response.status_code} - {response.text}")
                 
         except Exception as e:
-            print(f"Bağlantı hatası: Sunucu çalışıyor mu? (api/server.py çalıştırın) ({e})")
+            print(f"Bağlantı hatası: Yapay Zeka sunucusu (api/server.py) çalışıyor mu? ({e})")
             
-        time.sleep(5)
+        print("... 10 Saniye sonra tekrar kontrol edilecek ...")
+        time.sleep(10)
 
 if __name__ == "__main__":
     sensor_similasyonu()
