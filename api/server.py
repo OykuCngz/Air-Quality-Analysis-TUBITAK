@@ -20,6 +20,8 @@ import pandas as pd
 import numpy as np
 import json
 import os
+import shap
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -38,6 +40,7 @@ LEGACY_MODEL  = os.path.join(BASE_DIR, 'hava_kalitesi_modeli.pkl')
 model_pm10  = None
 model_pm25  = None
 metrics     = {}
+explainer_pm10 = None
 
 FEATURES = ['SO2', 'NO2', 'CO', 'O3', 'Temperature', 'Humidity', 'Wind_Speed']
 
@@ -52,6 +55,8 @@ def load_models():
         try:
             model_pm10 = joblib.load(MODEL_PM10)
             print(f"✅ PM10 model loaded from {MODEL_PM10}")
+            explainer_pm10 = shap.TreeExplainer(model_pm10)
+            print("🧠 SHAP Explainer initialized.")
         except Exception as e:
             print(f"❌ PM10 model load error: {e}")
     elif os.path.exists(LEGACY_MODEL):
@@ -124,15 +129,30 @@ def predict():
             if field not in data:
                 return jsonify({'status': 'error', 'message': f'Missing field: {field}'}), 400
 
-        # Build feature row (with defaults for optional meteorological features)
+        # Open-Meteo Live API Data Integration for missing meteorology
+        live_temp, live_hum, live_wind = 20.0, 60.0, 3.0
+        
+        if 'temperature' not in data and 'Temperature' not in data:
+            try:
+                # Istanbul geo-coordinates
+                om_url = "https://api.open-meteo.com/v1/forecast?latitude=41.0151&longitude=28.9795&current=temperature_2m,relative_humidity_2m,wind_speed_10m"
+                resp = requests.get(om_url, timeout=3).json()
+                current = resp.get("current", {})
+                live_temp = current.get("temperature_2m", 20.0)
+                live_hum  = current.get("relative_humidity_2m", 60.0)
+                # Ensure wind is mapped correctly (km/h -> m/s)
+                live_wind = round(current.get("wind_speed_10m", 10.8) / 3.6, 2)
+            except:
+                pass # fallback to dataset defaults
+
         row = {
             'SO2':         float(data['SO2']),
             'NO2':         float(data['NO2']),
             'CO':          float(data['CO']),
             'O3':          float(data['O3']),
-            'Temperature': float(data.get('temperature', data.get('Temperature', 20.0))),
-            'Humidity':    float(data.get('humidity',    data.get('Humidity',    60.0))),
-            'Wind_Speed':  float(data.get('wind_speed',  data.get('Wind_Speed',  3.0))),
+            'Temperature': float(data.get('temperature', data.get('Temperature', live_temp))),
+            'Humidity':    float(data.get('humidity',    data.get('Humidity',    live_hum))),
+            'Wind_Speed':  float(data.get('wind_speed',  data.get('Wind_Speed',  live_wind))),
         }
 
         # Only pass features the model was trained on
@@ -166,6 +186,21 @@ def predict():
         # Confidence: scaled by R² and input range
         confidence = min(99.0, max(70.0, r2_pm10 * 100 * 0.95 + np.random.normal(0, 0.5)))
 
+        # SHAP Explainable AI: Find feature contributions
+        shap_data = {}
+        base_value = 0.0
+        if explainer_pm10 is not None:
+            # For a single row, shap_values returns a 2D array [1, num_features]
+            sv = explainer_pm10.shap_values(X_input)
+            base_value = explainer_pm10.expected_value
+            # Handle list vs scalar base value
+            if isinstance(base_value, np.ndarray) or isinstance(base_value, list):
+                base_value = float(base_value[0])
+            
+            # Map SHAP values to features
+            for i, feat in enumerate(model_features):
+                shap_data[feat] = round(float(sv[0][i]), 2)
+
         return jsonify({
             'status':           'success',
             'pm10_prediction':  round(pm10_pred, 2),
@@ -174,7 +209,11 @@ def predict():
             'r2_pm10':          r2_pm10,
             'r2_pm25':          r2_pm25,
             'features_used':    model_features,
-            'input':            row
+            'input':            row,
+            'explanation': {
+                'base_value': round(float(base_value), 2),
+                'shap_values': shap_data
+            }
         })
 
     except ValueError as e:

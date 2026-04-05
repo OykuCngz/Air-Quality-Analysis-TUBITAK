@@ -1,7 +1,7 @@
 
 const API_CONFIG = {
     endpoint: 'http://localhost:5000/api/predict',
-    useMock: true     
+    useMock: false     
 };
 
 const PM10_LEVELS = [
@@ -49,7 +49,8 @@ async function fetchPrediction(vals) {
             pm10: d.pm10_prediction ?? d.prediction,
             pm25: d.pm25_prediction ?? d.pm10_prediction * 0.42,
             r2:   d.r2 ?? 0.82,
-            confidence: d.confidence ?? 94
+            confidence: d.confidence ?? 94,
+            explanation: d.explanation
         };
     } catch {
         return mockPrediction(vals);
@@ -108,6 +109,27 @@ function updatePredictionUI(result) {
         if (title) title.textContent = level.title;
         if (desc)  desc.textContent  = level.desc;
     });
+
+    // Render SHAP XAI
+    if (result.explanation && result.explanation.shap_values) {
+        let sv = result.explanation.shap_values;
+        let sorted = Object.entries(sv).sort((a,b) => Math.abs(b[1]) - Math.abs(a[1]));
+        if (sorted.length > 0) {
+            let topFeat = sorted[0];
+            let topFeat2 = sorted.length > 1 ? sorted[1] : null;
+            let effect = topFeat[1] > 0 ? "artırdı" : "düşürdü";
+            let featNames = {
+                "Temperature": "Sıcaklık", "Humidity": "Nem", "Wind_Speed": "Rüzgar Hızı"
+            };
+            let translate = (f) => featNames[f] || f;
+            
+            let txt = `Yapay zeka analizine göre, ölçümü en çok etkileyen faktör olan ${translate(topFeat[0])}, tahmini ${Math.abs(topFeat[1]).toFixed(1)} birim ötelemiştir.`;
+            if (topFeat2) {
+                txt += ` İkinci etki faktörü ise ${translate(topFeat2[0])}'dir.`;
+            }
+            setTextSafe('shapExplanation', txt);
+        }
+    }
 
     if (typeof updateTrendChart === 'function') updateTrendChart(pm10, pm25);
 }
