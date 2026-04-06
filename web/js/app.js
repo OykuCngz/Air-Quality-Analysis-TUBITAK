@@ -513,6 +513,8 @@ function initButtons() {
                     if (lTitle) lTitle.textContent = dist.name.toUpperCase() + ' ST.';
                     const hTitle = document.getElementById('mapLocationSubtitle');
                     if (hTitle) hTitle.innerHTML = '<span class="pin"></span> ISTANBUL: ' + dist.name.toUpperCase() + ' SATELLITE FEED';
+                    const feedBadge = document.getElementById('liveFeedBadge');
+                    if (feedBadge) feedBadge.innerHTML = '<span class="teal-dot"></span> LIVE FEED: ' + dist.name.toUpperCase() + ' ACTIVE';
                     AppState.activeStation = dist.name;
                 }
 
