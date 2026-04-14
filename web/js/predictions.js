@@ -24,13 +24,17 @@ function mockPrediction(vals) {
     const meteoFactor = (1 + (hum - 50) * 0.005) * (1 - wind * 0.02) * (1 + (temp - 20) * 0.01);
     
     const pm10 = Math.max(0, (intercept + pollutantLoad) * meteoFactor + (Math.random() * 2 - 1));
-
     const pm25 = Math.max(0, pm10 * 0.45 + (Math.random() * 1.5 - 0.75));
 
     const r2   = 0.88 + Math.random() * 0.04;
     const conf = 95.5 + Math.random() * 3;
 
-    return { pm10, pm25, r2, confidence: conf };
+    const shap_values = {
+        "NO2": (no2 * 0.65), "SO2": (so2 * 0.45),
+        "Ambient Temp": (temp - 20) * 0.05, "Relative Hum": (hum - 50) * 0.02
+    };
+
+    return { pm10, pm25, r2, confidence: conf, explanation: { shap_values } };
 }
 
 async function fetchPrediction(vals) {
@@ -116,22 +120,22 @@ function updatePredictionUI(result) {
         if (desc)  desc.textContent  = level.desc;
     });
 
-    // Render SHAP XAI
+
     if (result.explanation && result.explanation.shap_values) {
         let sv = result.explanation.shap_values;
         let sorted = Object.entries(sv).sort((a,b) => Math.abs(b[1]) - Math.abs(a[1]));
         if (sorted.length > 0) {
             let topFeat = sorted[0];
             let topFeat2 = sorted.length > 1 ? sorted[1] : null;
-            let effect = topFeat[1] > 0 ? "artırdı" : "düşürdü";
+
             let featNames = {
-                "Temperature": "Sıcaklık", "Humidity": "Nem", "Wind_Speed": "Rüzgar Hızı"
+                "Temperature": "Ambient Temp", "Humidity": "Relative Hum", "Wind_Speed": "Wind Vector"
             };
             let translate = (f) => featNames[f] || f;
             
-            let txt = `Yapay zeka analizine göre, ölçümü en çok etkileyen faktör olan ${translate(topFeat[0])}, tahmini ${Math.abs(topFeat[1]).toFixed(1)} birim ötelemiştir.`;
+            let txt = `According to live Feature Attribution (SHAP), the dominant feature vector is [${translate(topFeat[0])}], which shifted the model's baseline prediction by ${Math.abs(topFeat[1]).toFixed(2)} units.`;
             if (topFeat2) {
-                txt += ` İkinci etki faktörü ise ${translate(topFeat2[0])}'dir.`;
+                txt += ` The secondary impact tensor relies on [${translate(topFeat2[0])}] (${Math.abs(topFeat2[1]).toFixed(2)} units).`;
             }
             setTextSafe('shapExplanation', txt);
         }

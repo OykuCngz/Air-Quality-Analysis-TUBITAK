@@ -1,7 +1,4 @@
-/* ─────────────────────────────────────
-   AQI Calibrator – Charts
-   TÜBİTAK 2209-A | PM10 + PM2.5 dual trend
-───────────────────────────────────── */
+
 
 const CC = {
     pm10:      '#6366f1',
@@ -22,7 +19,7 @@ let historicalChart= null;
 let pm10Series     = [];
 let pm25Series     = [];
 
-/* ── Zaman etiketleri ─── */
+
 function makeTimeLabels(n = 12, intervalMin = 10) {
     const now = new Date();
     return Array.from({ length: n }, (_, i) => {
@@ -32,13 +29,13 @@ function makeTimeLabels(n = 12, intervalMin = 10) {
     });
 }
 
-/* ── Başlangıç verisi ─── */
+
 function initSeedData(n = 12) {
     pm10Series = Array.from({ length: n }, (_, i) => Math.max(10, 38 + Math.sin(i / 2.5) * 12 + Math.random() * 6));
     pm25Series = pm10Series.map(v => Math.max(4, v * 0.42 + (Math.random() - 0.5) * 3));
 }
 
-/* ── Gradyan yardımcısı ─── */
+
 function makeGradient(ctx, h, c0, c1) {
     const g = ctx.createLinearGradient(0, 0, 0, h);
     g.addColorStop(0, c0);
@@ -46,7 +43,7 @@ function makeGradient(ctx, h, c0, c1) {
     return g;
 }
 
-/* ── Ortak chart seçenekleri ─── */
+
 function baseOpts(extra = {}) {
     return {
         responsive: true,
@@ -95,7 +92,7 @@ function baseOpts(extra = {}) {
     };
 }
 
-/* ── Trend Chart (Ekran 1) ─── */
+
 function initTrendChart() {
     const canvas = document.getElementById('trendChart');
     if (!canvas) return;
@@ -137,14 +134,14 @@ function initTrendChart() {
     });
 }
 
-/* ── Historical Chart (Ekran 2) ─── */
+
 function initHistoricalChart() {
     const canvas = document.getElementById('historicalChart');
     if (!canvas) return;
 
     const ctx  = canvas.getContext('2d');
     const n    = 24;
-    const lbl  = makeTimeLabels(n, 60);              // 24 saatlik
+    const lbl  = makeTimeLabels(n, 60);              
     const d10  = Array.from({ length: n }, (_, i) => Math.max(10, 40 + Math.sin(i / 4) * 18 + Math.random() * 8));
     const d25  = d10.map(v => Math.max(4, v * 0.42 + (Math.random() - 0.5) * 4));
 
@@ -183,7 +180,7 @@ function initHistoricalChart() {
     });
 }
 
-/* ── Güncelleme (tahmin değiştiğinde) ─── */
+
 function updateTrendChart(newPm10, newPm25) {
     if (!trendChart) return;
 
@@ -196,7 +193,7 @@ function updateTrendChart(newPm10, newPm25) {
     trendChart.update('active');
 }
 
-/* ── Init ─── */
+
 function initCharts() {
     console.log('📊 Chart motoru başlatılıyor...');
     setTimeout(() => {

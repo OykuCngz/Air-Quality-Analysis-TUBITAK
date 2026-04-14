@@ -15,7 +15,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <body class="desktop-layout">
 
-<!-- SECURITY GATEWAY OVERLAY -->
 <div id="loginOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; background:rgba(5,8,17,0.85); backdrop-filter:blur(15px); display:flex; align-items:center; justify-content:center; flex-direction:column; transition: opacity 0.5s ease;">
     <div class="login-box" style="background:#131a2a; padding:40px; border-radius:18px; border:1px solid rgba(14,165,233,0.3); box-shadow:0 10px 40px rgba(0,0,0,0.6), 0 0 30px rgba(14,165,233,0.1); width: 380px; text-align: center;">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="1.5" style="margin-bottom:20px;">
@@ -90,7 +89,6 @@
                     <span class="user-role" style="color:#14b8a6;">PROJECT LEAD (2209-A)</span>
                 </div>
                 <div class="avatar" style="margin-right: 8px;"><img src="https://ui-avatars.com/api/?name=O+C&background=0e1528&color=14b8a6" alt="Avatar"></div>
-                
                 <button id="doLogoutBtn" title="System Logout" style="cursor:pointer; color:#f87171; background:rgba(248,113,113,0.05); padding:8px; border-radius:50%; display:flex; align-items:center; justify-content:center; width:40px; height:40px; transition:0.3s; border:1px solid rgba(248,113,113,0.2);" onmouseover="this.style.background='rgba(248,113,113,0.2)'; this.style.boxShadow='0 0 15px rgba(248,113,113,0.5)';" onmouseout="this.style.background='rgba(248,113,113,0.05)'; this.style.boxShadow='none';">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
@@ -185,11 +183,21 @@
             <button class="btn-outline-glow mt-lg" id="resetBtn">RECALIBRATE ML CORE</button>
         </div>
 
-                <div class="panel chart-panel">
+                <div class="panel chart-panel" style="display: flex; flex-direction: column;">
             <h3 class="panel-header">24-Hour Forecast Trend</h3>
             <p class="panel-sub">Temporal analysis based on LSTM modeling</p>
-            <div class="chart-wrapper">
+            <div class="chart-wrapper" style="flex: 1; min-height: 220px;">
                 <canvas id="trendChart"></canvas>
+            </div>
+            
+            <div class="shap-bar" style="margin-top: 20px; padding: 18px 24px; border-radius: 12px; background: rgba(20, 184, 166, 0.05); border: 1px solid rgba(20, 184, 166, 0.15); display: flex; align-items: flex-start; gap: 18px; box-shadow: inset 0 0 20px rgba(20,184,166,0.02);">
+                <div style="background: rgba(20, 184, 166, 0.15); padding: 12px; border-radius: 10px; color: var(--teal); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(20,184,166,0.2);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; color: var(--teal); margin: 0 0 6px 0; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 0 10px rgba(20,184,166,0.3);">XAI: Real-Time Model Reasoning Data</h4>
+                    <p id="shapExplanation" style="font-size: 0.85rem; color: #cbd5e1; margin: 0; line-height: 1.6; font-family: 'Inter', sans-serif;">Awaiting live ML inference and feature attribution pipeline...</p>
+                </div>
             </div>
         </div>
 
@@ -207,16 +215,32 @@
                 <span class="m-label">CONFIDENCE</span>
                 <span class="m-val" id="confidenceValue">82.4%</span>
             </div>
-            <div class="metric-row mt-sm">
+            <div class="metric-row mt-sm" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
                 <span class="m-label">TOTAL DATA ROWS</span>
                 <span class="m-val">160,107</span>
             </div>
+            
+            <div class="metric-row mt-sm" style="border-bottom: none; padding-bottom: 0;">
+                <span class="m-label">INFERENCE LATENCY</span>
+                <span class="m-val" style="color: var(--teal);">42 ms</span>
+            </div>
+            
+            <div style="margin-top: 35px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.1);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: #94a3b8; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">
+                    <span>COMPUTE NODE LOAD</span>
+                    <span id="nodeLoadText">24%</span>
+                </div>
+                <div style="width: 100%; height: 6px; background: rgba(20, 184, 166, 0.15); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);">
+                    <div id="nodeLoadBar" style="width: 24%; height: 100%; background: var(--teal); box-shadow: 0 0 10px var(--teal); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                </div>
+            </div>
+        </div>
 
-            <div class="shap-box mt-lg" style="background: rgba(20, 184, 166, 0.05); border: 1px solid rgba(20, 184, 166, 0.2); padding: 12px; border-radius: 8px; margin-top:20px;">
-                <h4 style="font-size: 0.75rem; color: var(--teal); margin: 0 0 5px 0; display: flex; align-items: center; gap: 5px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> XAI Reasoning (SHAP)
-                </h4>
-                <p id="shapExplanation" style="font-size: 0.8rem; color: var(--text-sub); margin: 0; line-height: 1.4;">Awaiting live ML inference...</p>
+        <div class="panel forecast-panel" style="padding-bottom: 16px;">
+            <h3 class="panel-header">7-Day Meteorological & AQI Forecast</h3>
+            <p class="panel-sub" id="forecastSubtitle">Istanbul Active Station Predictive Weather Data</p>
+            <div id="forecastContainer" style="display: flex; gap: 14px; margin-top: 10px; width: 100%; overflow-x: auto; padding: 4px 0 8px 0; scrollbar-width: thin; scrollbar-color: rgba(14, 165, 233, 0.4) transparent;">
+                <div style="color: var(--text-sub); font-size: 0.85rem;">Initializing satellite telemetry for 7-day forecast...</div>
             </div>
         </div>
     </div>

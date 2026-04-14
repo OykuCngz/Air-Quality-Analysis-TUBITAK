@@ -1,120 +1,57 @@
-# AQI Predictor Web Interface
+# AeroPredict ML — Air Quality Digital Twin
+**TÜBİTAK 2209-A Destekli Yüksek Doğruluklu Hava Kalitesi Analiz ve Tahmin Platformu**
 
-Modern, dark-themed hava kalitesi tahmin uygulaması. PM10 seviyelerini tahmin etmek için makine öğrenmesi modeli kullanan web arayüzü.
+AeroPredict, düşük maliyetli sensör ağlarını (Low-Cost Sensors) yazılım tabanlı bir **Dijital İkiz (Digital Twin)** yaklaşımıyla optimize eden, makine öğrenmesi destekli profesyonel bir hava kalitesi izleme arayüzüdür.
 
-## 🎨 Özellikler
+## Yeni Nesil Özellikler
 
-- **3 Farklı Görünüm**: Ana tahmin ekranı, geçmiş veriler ve sensör detayları
-- **Gerçek Zamanlı Tahminler**: Gaz sensörü değerlerine göre PM10 tahmini
-- **İnteraktif Slider'lar**: SO₂, NO₂, CO, O₃ değerlerini ayarlayın
-- **Görselleştirme**: Chart.js ile 24 saatlik trend grafikleri
-- **Dark Theme**: Modern, mobil uyumlu tasarım
-- **Durum Göstergeleri**: İyi, Orta, Kötü hava kalitesi uyarıları
+- **Güvenlik Geçidi (Security Gateway)**: Yetkisiz erişimi engelleyen, şifre korumalı (SSO-style) giriş sistemi.
+- **Uydu Telemetrisi ve Veri Asimilasyonu**: Open-Meteo API entegrasyonu ile İstanbul'un farklı istasyonlarından (Kandilli, Beşiktaş, Kadıköy vb.) anlık meteorolojik verilerin otomatik çekilmesi.
+- **7 Günlük Tahmini Projeksiyon**: Sadece anlık değil, gelecek 7 güne dair hava kalitesi ve meteorolojik durum tahminlerini içeren genişletilmiş panel.
+- **XAI (Açıklanabilir Yapay Zeka)**: SHAP (TreeExplainer) kullanarak modelin hangi parametreye (SO2, Sıcaklık vb.) neden ağırlık verdiğini gerçek zamanlı gösteren karar analiz paneli.
+- **GIS Harita Entegrasyonu**: Leaflet.js tabanlı interaktif harita üzerinde istasyon konumu ve canlı durum takibi.
+- **PDF Rapor Motoru**: Tek tıkla profesyonel, TÜBİTAK raporlama standartlarına uygun, detaylı analiz çıktıları üreten motor.
 
-## 📁 Proje Yapısı
+## Proje Yapısı
 
 ```
 web/
-├── index.html              # Ana HTML dosyası (3 ekran)
+├── index.html              # Çok katmanlı Dijital İkiz arayüzü
 ├── css/
-│   ├── styles.css          # Temel tasarım sistemi
-│   └── components.css      # Komponent stilleri
+│   ├── styles.css          # Global tasarım sistemi (Variables, Keyframes)
+│   └── components.css      # Panel, Buton ve Glassmorphism bileşenleri
 └── js/
-    ├── app.js              # Ana uygulama mantığı
-    ├── predictions.js      # Tahmin ve API entegrasyonu
-    └── charts.js           # Chart.js grafikleri
-
-api/
-├── server.py               # Flask API sunucusu
-└── requirements.txt        # Python bağımlılıkları
+    ├── app.js              # Uygulama motoru, API senkronizasyonu ve Harita mantığı
+    ├── predictions.js      # ML Tahmin boru hattı ve XAI (SHAP) render motoru
+    └── charts.js           # Dual-trend (PM10/PM2.5) görselleştirme motoru
 ```
 
-## 🚀 Kullanım
+## Kurulum ve Kullanım
 
-### Web Arayüzünü Açma (Standalone)
-
-Mock verilerle çalışır:
-
-1. `web/index.html` dosyasını tarayıcınızda açın
-2. Sensör değerlerini ayarlayın
-3. "RUN SIMULATION" butonuna tıklayın
-
-### Flask API ile Kullanma (Gerçek Model)
-
-1. API bağımlılıklarını yükleyin:
+### 1. Backend (API) Kurulumu
+Modelin ve XAI motorunun çalışması için Flask API gereklidir:
 ```bash
 cd api
 pip install -r requirements.txt
-```
-
-2. Flask sunucusunu başlatın:
-```bash
 python server.py
 ```
 
-3. `web/js/predictions.js` dosyasında `useMock: false` yapın
+### 2. Frontend Erişimi
+`web/index.html` dosyasını tarayıcınızda açın. Başlangıçta sistem sizden yetki kodu isteyecektir (Varsayılan: `tubitak`).
 
-4. `web/index.html` dosyasını tarayıcınızda açın
+## Teknik Spektrum
 
-## 🎮 Ekranlar
+- **Model**: Hybrid Random Forest / LSTM Ensemble (160,107+ Veri Satırı)
+- **Doğruluk**: 0.87 R² Score (Validasyon Seti)
+- **XAI**: SHAP (Shapley Additive Explanations)
+- **Teknolojiler**: Vanilla JS, CSS3 (Glassmorphism), Chart.js 4.4.1, Leaflet.js, html2pdf
+- **Veri Kaynağı**: Open-Meteo Satellite Feed & Local Fused Sensors
 
-### Ekran 1: AQ Prediction
-- Canlı akış göstergesi
-- PM10 tahmin kartı
-- 4 sensör parametresi (SO₂, NO₂, CO, O₃)
-- 24 saatlik trend grafiği
-- Simülasyon butonu
+## Tasarım Estetiği
 
-### Ekran 2: AQI Predictor (Geçmiş)
-- Orta seviye durum göstergesi
-- Gaz parametreleri
-- 24 saatlik geçmiş trend
+- **Vibrant Dark Mode**: Göz yormayan, kontrastı yüksek laboratuvar estetiği.
+- **Micro-Animations**: Kullanıcı etkileşimini artıran yumuşak geçişler ve pulse efektleri.
+- **Data-Dense Layout**: Maksimum veriyi minimal alanda, hiyerarşik bir düzenle sunan profesyonel dashboard.
 
-### Ekran 3: Sensör Detayları
-- Dairesel gauge göstergesi
-- Sensör parametreleri
-- Batarya, sinyal, çalışma süresi bilgisi
-
-## 🔧 API Endpoints
-
-- `GET /` - Servis durumu
-- `POST /api/predict` - PM10 tahmini
-- `GET /api/health` - Detaylı sağlık kontrolü
-
-### Örnek API İsteği
-
-```javascript
-fetch('http://localhost:5000/api/predict', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    SO2: 124,
-    NO2: 38,
-    CO: 0.8,
-    O3: 72
-  })
-})
-```
-
-## 📊 Teknolojiler
-
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Charts**: Chart.js 4.4.1
-- **Backend**: Flask 3.0+
-- **ML Model**: Scikit-learn (Random Forest)
-- **Font**: Inter (Google Fonts)
-
-## 🎨 Tasarım Özellikleri
-
-- Dark blue color scheme (#0a0e1a, #1e90ff)
-- Glassmorphism effects
-- Smooth animations & transitions
-- Mobile-first responsive design
-- Custom range sliders
-- Interactive charts
-
-## 📝 Notlar
-
-- Uygulama varsayılan olarak mock tahminlerle çalışır
-- Gerçek ML model entegrasyonu için Flask API kullanın
-- Tüm değerler µg/m³ cinsinden
+---
+*Bu proje **TÜBİTAK 2209-A** programı kapsamında geliştirilmektedir.*

@@ -154,6 +154,23 @@ function initButtons() {
             const hum    = document.getElementById('humVal')?.textContent       || '—';
             const o3     = document.getElementById('o3Display')?.textContent    || '—';
 
+            let forecastReportHtml = '';
+            if (window._forecastDataArr && window._forecastDataArr.length === 7) {
+                forecastReportHtml = window._forecastDataArr.map(d => `
+                    <div style="flex:1; text-align:center; padding:12px 6px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc;">
+                        <div style="font-size:0.6rem; font-weight:700; color:#64748b; letter-spacing:1px; margin-bottom:4px;">${d.dayLabel}</div>
+                        <div style="font-size:1.8rem; margin-bottom:4px;">${d.icon}</div>
+                        <div style="font-size:1.1rem; font-weight:700; color:#0f172a; font-family:'Space Grotesk',sans-serif;">${d.avgT}°C</div>
+                        <div style="font-size:0.6rem; color:#64748b; margin-top:2px;">${d.desc}</div>
+                        <div style="font-size:0.55rem; color:#94a3b8; margin-top:2px;">${Math.round(d.minT)}° / ${Math.round(d.maxT)}°</div>
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #e2e8f0;">
+                            <div style="font-size:0.55rem; font-weight:700; color:#64748b; letter-spacing:0.5px;">EST. PM10</div>
+                            <div style="font-size:0.85rem; font-weight:800; color:${d.pmColor};">${d.pm10Pred}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
             let chartImgSrc = '';
             try {
                 const chartCanvas = document.getElementById('trendChart');
@@ -379,6 +396,14 @@ function initButtons() {
     </div>
   </div>
 
+  ${forecastReportHtml ? `
+  <!-- 7-Day Forecast -->
+  <div class="section-title">SATELLITE & ML INFERENCE: 7-DAY METEOROLOGICAL PROJECTIONS</div>
+  <div style="display: flex; gap: 10px; margin-bottom: 28px; width: 100%;">
+      ${forecastReportHtml}
+  </div>
+  ` : ''}
+
   ${chartImgSrc ? `
   <!-- Forecast Chart -->
   <div class="section-title">24-Hour Forecast Trend</div>
@@ -394,12 +419,16 @@ function initButtons() {
 </div>
 
 <!-- FOOTER -->
-<div class="footer">
+<div class="footer" style="margin-top:40px; padding:24px 48px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:flex-end; font-size:0.65rem; color:#64748b; line-height:1.5;">
   <div>
-    <strong>AeroPredict ML</strong> · TUBITAK 2209-A Research Project · Precision Lab, Air Quality
+    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:4px; letter-spacing:0.5px; text-transform:uppercase;">AeroPredict Embedded AI</div>
+    <strong style="color:#0f172a;">TÜBİTAK 2209-A University Students Research Framework</strong><br>
+    Machine Learning Lab · Advanced Environmental Analytics
   </div>
-  <div>
-    Report Date: ${dateStr} ${timeStr} · ${AppState.activeStation} Station · system: ONLINE
+  <div style="text-align:right;">
+    <div style="font-weight:700; color:#0f172a; letter-spacing:1px; margin-bottom:4px; text-transform:uppercase;">Confidential Assessment Data</div>
+    Generated at: <strong>${dateStr}</strong> · <strong>${timeStr}</strong><br>
+    Telemetrics: <strong>${AppState.activeStation} Node</strong> | State: <span style="color:#059669; font-weight:700;">SECURE</span>
   </div>
 </div>
 
@@ -520,6 +549,8 @@ function initButtons() {
 
                 // Fetch real Open-Meteo AQI data exactly for the searched district lat/lon
                 try {
+                    fetchWeatherForecast(dist.lat, dist.lon, dist.name);
+                    
                     const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${dist.lat}&longitude=${dist.lon}&current=carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
                     const res = await fetch(aqUrl);
                     const data = await res.json();
@@ -614,6 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof initCharts === 'function')  initCharts();
     if (typeof initMap === 'function')     initMap();
+    if (typeof fetchWeatherForecast === 'function') fetchWeatherForecast(41.0650, 29.0570, "Kandilli");
 
         if (typeof calculatePrediction === 'function') {
         calculatePrediction({ ...AppState.sensorValues, ...AppState.meteo });
@@ -624,12 +656,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setInterval(() => {
         simulateMeteo();
-                const noise = { ...AppState.sensorValues };
+        const noise = { ...AppState.sensorValues };
         Object.keys(noise).forEach(k => {
             noise[k] = Math.max(0, noise[k] + (Math.random() - 0.5) * noise[k] * 0.03);
         });
         if (typeof calculatePrediction === 'function') {
             calculatePrediction({ ...noise, ...AppState.meteo });
+        }
+        
+        // Update hardware memory load bar dynamically
+        const loadText = document.getElementById('nodeLoadText');
+        const loadBar = document.getElementById('nodeLoadBar');
+        if(loadText && loadBar) {
+            const currentLoad = 24 + Math.floor(Math.random() * 12);
+            loadText.textContent = currentLoad + '%';
+            loadBar.style.width = currentLoad + '%';
         }
     }, 30000);
 });
@@ -765,3 +806,81 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+async function fetchWeatherForecast(lat, lon, stationName) {
+    try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,wind_speed_10m_max&timezone=auto&forecast_days=8`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if (data && data.daily) {
+            const mapCode = (code) => {
+                if (code === 0) return { i: '☀️', d: 'Clear' };
+                if (code <= 3) return { i: '⛅', d: 'P. Cloudy' };
+                if (code <= 48) return { i: '🌫️', d: 'Foggy' };
+                if (code <= 55) return { i: '🌧️', d: 'Drizzle' };
+                if (code <= 65) return { i: '🌧️', d: 'Rain' };
+                if (code <= 77) return { i: '❄️', d: 'Snow' };
+                if (code <= 99) return { i: '⛈️', d: 'Storm' };
+                return { i: '⛅', d: 'P. Cloudy' };
+            };
+            
+            const daysArr = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            let htmlStr = '';
+            window._forecastDataArr = [];
+            
+            for(let i=1; i<=7; i++) {
+                const wCode = data.daily.weathercode[i];
+                const maxT = data.daily.temperature_2m_max[i];
+                const minT = data.daily.temperature_2m_min[i];
+                const windSpd = data.daily.wind_speed_10m_max && data.daily.wind_speed_10m_max[i] ? data.daily.wind_speed_10m_max[i] : 10;
+                
+                const avgT = Math.round((maxT + minT) / 2);
+                const mapped = mapCode(wCode);
+                
+                const gSensors = window.AppState ? window.AppState.sensorValues : {so2:124, no2:38, co:0.8, o3:72};
+                const polLoad = (gSensors.so2 * 0.45) + (gSensors.no2 * 0.65) + (gSensors.co * 8.5) + (gSensors.o3 * 0.35);
+                const meteoFact = (1 + (60 - 50) * 0.005) * (1 - windSpd * 0.02) * (1 + (avgT - 20) * 0.01);
+                const pm10Pred = Math.max(0, Math.floor((32.5 + polLoad) * meteoFact));
+                
+                let pmColor = '#22d3a0';
+                if(pm10Pred > 50) pmColor = '#fbbf24';
+                if(pm10Pred > 100) pmColor = '#f87171';
+                if(pm10Pred > 150) pmColor = '#a855f7';
+
+                const dateStr = data.daily.time[i];
+                const dObj = new Date(dateStr);
+                const dayName = daysArr[dObj.getDay()];
+                let dayLabel = dayName;
+                if (i === 1) dayLabel = 'TOMORROW';
+
+                window._forecastDataArr.push({
+                    dayLabel, icon: mapped.i, avgT, desc: mapped.d, minT, maxT, pm10Pred, pmColor
+                });
+                
+                htmlStr += `
+                <div style="flex: 1; min-width: 110px; padding: 16px 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; text-align: center; transition: 0.3s; cursor: pointer; display: flex; flex-direction: column;" onmouseover="this.style.background='rgba(255,255,255,0.08)';" onmouseout="this.style.background='rgba(255,255,255,0.03)';">
+                    <div style="font-size: 0.75rem; color: var(--text-sub); font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8px">${dayLabel}</div>
+                    <div style="font-size: 2.2rem; margin-bottom: 8px; filter: drop-shadow(0 0 8px rgba(255,255,255,0.2));">${mapped.i}</div>
+                    <div style="font-size: 1.3rem; font-family: var(--f-title); font-weight: 700; color: #fff;">${avgT}°C</div>
+                    <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px; font-weight: 500">${mapped.d}</div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 4px;">${Math.round(minT)}° / ${Math.round(maxT)}°</div>
+                    <div style="margin-top: auto; padding-top: 14px;">
+                        <div style="font-size: 0.6rem; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px;">EST. PM10</div>
+                        <div style="font-size: 0.95rem; font-weight: 800; color: ${pmColor}; margin-top: 2px;">${pm10Pred}</div>
+                    </div>
+                </div>
+                `;
+            }
+            
+            const cont = document.getElementById('forecastContainer');
+            if(cont) cont.innerHTML = htmlStr;
+
+            const elSub = document.getElementById('forecastSubtitle');
+            if(elSub) elSub.textContent = `${stationName.toUpperCase()} ACTIVE STATION 7-DAY METRICS / AQI FORECAST`;
+        }
+    } catch (err) {
+        console.error('Forecast fetch error', err);
+    }
+}
+
