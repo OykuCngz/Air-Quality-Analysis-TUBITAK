@@ -1,7 +1,7 @@
 # AeroPredict ML — Air Quality Digital Twin
 **TÜBİTAK 2209-A Destekli Yüksek Doğruluklu Hava Kalitesi Analiz ve Tahmin Platformu**
 
-AeroPredict, düşük maliyetli sensör ağlarını (Low-Cost Sensors) yazılım tabanlı bir **Dijital İkiz (Digital Twin)** yaklaşımıyla optimize eden, makine öğrenmesi destekli profesyonel bir hava kalitesi izleme arayüzüdür.
+AeroPredict, düşük maliyetli sensör ağlarını (Low-Cost Sensors) yazılım tabanlı bir Dijital İkiz (Digital Twin) yaklaşımıyla optimize eden, makine öğrenmesi destekli profesyonel bir hava kalitesi izleme arayüzüdür.
 
 ## Yeni Nesil Özellikler
 
@@ -37,7 +37,7 @@ python server.py
 ```
 
 ### 2. Frontend Erişimi
-`web/index.html` dosyasını tarayıcınızda açın. Başlangıçta sistem sizden yetki kodu isteyecektir (Varsayılan: `tubitak`).
+`web/index.html` dosyasını tarayıcınızda açın. Başlangıçta sistem sizden yetki kodu isteyecektir (Varsayılan: tubitak).
 
 ## Teknik Spektrum
 
@@ -47,11 +47,11 @@ python server.py
 - **Teknolojiler**: Vanilla JS, CSS3 (Glassmorphism), Chart.js 4.4.1, Leaflet.js, html2pdf
 - **Veri Kaynağı**: Open-Meteo Satellite Feed & Local Fused Sensors
 
-## Tasarım Estetiği
+## Tasarım Özellikleri
 
 - **Vibrant Dark Mode**: Göz yormayan, kontrastı yüksek laboratuvar estetiği.
 - **Micro-Animations**: Kullanıcı etkileşimini artıran yumuşak geçişler ve pulse efektleri.
 - **Data-Dense Layout**: Maksimum veriyi minimal alanda, hiyerarşik bir düzenle sunan profesyonel dashboard.
 
 ---
-*Bu proje **TÜBİTAK 2209-A** programı kapsamında geliştirilmektedir.*
+*Bu proje TÜBİTAK 2209-A programı kapsamında geliştirilmektedir.*
