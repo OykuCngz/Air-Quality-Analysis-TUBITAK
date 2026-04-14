@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" width="200" alt="AeroMetric XAI Logo">
+  <img src="logo.png" width="320" alt="AeroMetric XAI Logo">
 </p>
 
 # AeroMetric XAI: High-Fidelity Air Quality Digital Twin & ML Analysis
