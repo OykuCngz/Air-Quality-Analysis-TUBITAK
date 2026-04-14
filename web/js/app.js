@@ -194,7 +194,7 @@ function initButtons() {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AeroPredict ML — Air Quality Report</title>
+<title>AeroMetric XAI — Analytics Report</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
   @page { size: A4; margin: 0; }
@@ -297,10 +297,10 @@ function initButtons() {
 <div class="cover">
   <div class="cover-logo">
     <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14V8H4V14ZM12 2C8.69 2 6 4.69 6 8H18C18 4.69 15.31 2 12 2Z"/></svg>
+      <img src="assets/icons/icon.png" style="width:40px; height:40px; object-fit:contain;">
     </div>
     <div>
-      <div class="brand-name">AeroPredict ML</div>
+      <div class="brand-name">AeroMetric XAI</div>
       <div class="brand-sub">TUBITAK 2209-A RESEARCH PROJECT</div>
     </div>
   </div>
@@ -421,7 +421,7 @@ function initButtons() {
 <!-- FOOTER -->
 <div class="footer" style="margin-top:40px; padding:24px 48px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:flex-end; font-size:0.65rem; color:#64748b; line-height:1.5;">
   <div>
-    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:4px; letter-spacing:0.5px; text-transform:uppercase;">AeroPredict Embedded AI</div>
+    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.85rem; font-weight:800; color:#0f172a; margin-bottom:4px; letter-spacing:0.5px; text-transform:uppercase;">AeroMetric XAI System Architecture</div>
     <strong style="color:#0f172a;">TÜBİTAK 2209-A University Students Research Framework</strong><br>
     Machine Learning Lab · Advanced Environmental Analytics
   </div>
@@ -637,7 +637,7 @@ function showToast(msg) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🌍 AQI Kalibratör — TÜBİTAK 2209-A hazır');
+    console.log('🌍 AeroMetric XAI — TÜBİTAK 2209-A Ready');
 
     initNavigation();
     initSliders();

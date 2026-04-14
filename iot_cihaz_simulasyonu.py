@@ -10,7 +10,7 @@ OPEN_METEO_AQ_URL = f"https://air-quality-api.open-meteo.com/v1/air-quality?lati
 
 def sensor_similasyonu():
     print("=====================================================")
-    print("  TÜBİTAK 2209-A: SENSÖRSÜZ CANLI VERİ ASİMİLASYONU")
+    print("  AeroMetric XAI: REAL-TIME DATA ASSIMILATION")
     print(f"  Lokasyon: İstanbul, Kandilli (Lat: {LATITUDE}, Lon: {LONGITUDE})")
     print("=====================================================")
     

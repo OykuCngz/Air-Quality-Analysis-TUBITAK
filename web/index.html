@@ -1,306 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>AeroPredict ML | Precision Lab</title>
+    <title>AeroMetric XAI</title>
 
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="icon" type="image/x-icon" href="assets/icon.png">
+    <link rel="icon" type="image/x-icon" href="assets/icons/icon.png">
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <body class="desktop-layout">
 
-<div id="loginOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; background:rgba(5,8,17,0.85); backdrop-filter:blur(15px); display:flex; align-items:center; justify-content:center; flex-direction:column; transition: opacity 0.5s ease;">
-    <div class="login-box" style="background:#131a2a; padding:40px; border-radius:18px; border:1px solid rgba(14,165,233,0.3); box-shadow:0 10px 40px rgba(0,0,0,0.6), 0 0 30px rgba(14,165,233,0.1); width: 380px; text-align: center;">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="1.5" style="margin-bottom:20px;">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-        <h2 style="color:#fff; margin:0 0 10px; font-family:'Space Grotesk',sans-serif; letter-spacing:1px;">System Authorization</h2>
-        <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:30px;">AeroPredict ML Digital Twin Network</p>
-        
-        <input type="password" id="loginPassword" placeholder="Enter Access Code..." style="width:100%; padding:12px 16px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; outline:none; margin-bottom:20px; text-align:center; letter-spacing:2px; font-family: monospace;">
-        
-        <button id="loginBtn" class="btn-predict-large" style="margin-bottom:0; font-family:'Space Grotesk',sans-serif; letter-spacing: 1px; color:#fff;">AUTHORIZE ACCESS</button>
-        <div id="loginError" style="color:#f87171; font-size:0.75rem; margin-top:12px; height:15px; font-weight:600;"></div>
-    </div>
-</div>
-
-<aside class="sidebar">
-    <div class="brand">
-        <div class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--secondary)" stroke="none">
-                <path d="M4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14V8H4V14ZM12 2C8.69 2 6 4.69 6 8H18C18 4.69 15.31 2 12 2Z"/>
+    <div id="loginOverlay"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; background:rgba(5,8,17,0.85); backdrop-filter:blur(15px); display:flex; align-items:center; justify-content:center; flex-direction:column; transition: opacity 0.5s ease;">
+        <div class="login-box"
+            style="background:#131a2a; padding:40px; border-radius:18px; border:1px solid rgba(14,165,233,0.3); box-shadow:0 10px 40px rgba(0,0,0,0.6), 0 0 30px rgba(14,165,233,0.1); width: 380px; text-align: center;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="1.5"
+                style="margin-bottom:20px;">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
-        </div>
-        <div>
-            <div class="brand-title">AeroPredict</div>
-            <div class="brand-subtitle">TÜBİTAK 2209-A</div>
-        </div>
-    </div>
-    
-    <nav class="side-nav">
-        <a href="#" class="nav-item active">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            OBSERVATORY
-        </a>
-        <a href="#" class="nav-item" id="dataConfigBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-            ML MODELS
-        </a>
-        <a href="#" class="nav-item" id="settingsNavItem">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 8v4l3 3"/></svg>
-            DOCUMENTATION
-        </a>
-    </nav>
-    
-    <div class="sidebar-bottom">
-        <button class="btn-predict-large" id="runSimulationBtn">New Prediction</button>
-        <div class="nav-item sys-status">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            SYSTEM STATUS: ONLINE
-        </div>
-    </div>
-</aside>
+            <h2 style="color:#fff; margin:0 0 10px; font-family:'Space Grotesk',sans-serif; letter-spacing:1px;">System
+                Authorization</h2>
+            <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:30px;">AeroMetric XAI Digital Twin Network</p>
 
-<main class="main-content" id="screen1">
-    <header class="top-nav">
-        <div class="app-header-title">
-            <span class="bold-title">AeroPredict ML</span> <span class="light-title">| TÜBİTAK 2209-A</span>
+            <input type="password" id="loginPassword" placeholder="Enter Access Code..."
+                style="width:100%; padding:12px 16px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; outline:none; margin-bottom:20px; text-align:center; letter-spacing:2px; font-family: monospace;">
+
+            <button id="loginBtn" class="btn-predict-large"
+                style="margin-bottom:0; font-family:'Space Grotesk',sans-serif; letter-spacing: 1px; color:#fff;">AUTHORIZE
+                ACCESS</button>
+            <div id="loginError"
+                style="color:#f87171; font-size:0.75rem; margin-top:12px; height:15px; font-weight:600;"></div>
         </div>
-        <div class="header-right">
-            <div class="search-box">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </div>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo">
+                <img src="assets/icons/icon.png" alt="AeroMetric Logo" style="width:32px; height:32px; object-fit:contain;">
+            </div>
+            <div>
+                <div class="brand-title">AeroMetric XAI</div>
+                <div class="brand-subtitle">TÜBİTAK 2209-A</div>
+            </div>
+        </div>
+
+        <nav class="side-nav">
+            <a href="#" class="nav-item active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
-                <input type="text" id="stationSearch" placeholder="Search...">
+                OBSERVATORY
+            </a>
+            <a href="#" class="nav-item" id="dataConfigBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <line x1="3" y1="9" x2="21" y2="9" />
+                    <line x1="9" y1="21" x2="9" y2="9" />
+                </svg>
+                ML MODELS
+            </a>
+            <a href="#" class="nav-item" id="settingsNavItem">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+                    <path d="M12 8v4l3 3" />
+                </svg>
+                DOCUMENTATION
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button class="btn-predict-large" id="runSimulationBtn">New Prediction</button>
+            <div class="nav-item sys-status">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+                SYSTEM STATUS: ONLINE
             </div>
-            <button class="icon-nav-btn" id="exportBtn" title="Export Dashboard PDF" style="margin-right:16px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </button>
-            <div class="profile-area">
-                <div class="profile-info">
-                    <span class="user-name" style="color:#fff; font-size:0.9rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">Öykü Cengiz</span>
-                    <span class="user-role" style="color:#14b8a6;">PROJECT LEAD (2209-A)</span>
+        </div>
+    </aside>
+
+    <main class="main-content" id="screen1">
+        <header class="top-nav">
+            <div class="app-header-title">
+                <span class="bold-title">AeroMetric XAI</span> <span class="light-title">| TÜBİTAK 2209-A</span>
+            </div>
+            <div class="header-right">
+                <div class="search-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="stationSearch" placeholder="Search...">
                 </div>
-                <div class="avatar" style="margin-right: 8px;"><img src="https://ui-avatars.com/api/?name=O+C&background=0e1528&color=14b8a6" alt="Avatar"></div>
-                <button id="doLogoutBtn" title="System Logout" style="cursor:pointer; color:#f87171; background:rgba(248,113,113,0.05); padding:8px; border-radius:50%; display:flex; align-items:center; justify-content:center; width:40px; height:40px; transition:0.3s; border:1px solid rgba(248,113,113,0.2);" onmouseover="this.style.background='rgba(248,113,113,0.2)'; this.style.boxShadow='0 0 15px rgba(248,113,113,0.5)';" onmouseout="this.style.background='rgba(248,113,113,0.05)'; this.style.boxShadow='none';">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                <button class="icon-nav-btn" id="exportBtn" title="Export Dashboard PDF" style="margin-right:16px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
                 </button>
+                <div class="profile-area">
+                    <div class="profile-info">
+                        <span class="user-name"
+                            style="color:#fff; font-size:0.9rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.5px;">Öykü
+                            Cengiz</span>
+                        <span class="user-role" style="color:#14b8a6;">PROJECT LEAD (2209-A)</span>
+                    </div>
+                    <div class="avatar" style="margin-right: 8px;"><img
+                            src="https://ui-avatars.com/api/?name=O+C&background=0e1528&color=14b8a6" alt="Avatar">
+                    </div>
+                    <button id="doLogoutBtn" title="System Logout"
+                        style="cursor:pointer; color:#f87171; background:rgba(248,113,113,0.05); padding:8px; border-radius:50%; display:flex; align-items:center; justify-content:center; width:40px; height:40px; transition:0.3s; border:1px solid rgba(248,113,113,0.2);"
+                        onmouseover="this.style.background='rgba(248,113,113,0.2)'; this.style.boxShadow='0 0 15px rgba(248,113,113,0.5)';"
+                        onmouseout="this.style.background='rgba(248,113,113,0.05)'; this.style.boxShadow='none';">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                            <line x1="12" y1="2" x2="12" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+
+            <div class="panel prediction-panel">
+                <div class="panel-tag"><span class="blue-dot"></span> REAL-TIME INFERENCE</div>
+                <div class="pred-split">
+                    <div class="pred-text">
+                        <h2 class="pred-title">Predicted<br>PM10</h2>
+                        <div class="confidence-badge">98.4% CONFIDENCE</div>
+                        <span class="pred-unit">µg/m³ units</span>
+                    </div>
+                    <div class="pred-ring pm10-ring">
+                        <svg viewBox="0 0 36 36" class="circular-chart blue">
+                            <path class="circle-bg"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="circle" id="pm10RingBg" stroke-dasharray="80, 100"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="ring-value" id="pm10Value">42.8</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel prediction-panel">
+                <div class="panel-tag"><span class="teal-dot"></span> DEEP LEARNING OUTPUT</div>
+                <div class="pred-split">
+                    <div class="pred-text">
+                        <h2 class="pred-title">Predicted<br>PM2.5</h2>
+                        <div class="confidence-badge teal">97.9% CONFIDENCE</div>
+                        <span class="pred-unit">µg/m³ units</span>
+                    </div>
+                    <div class="pred-ring pm25-ring">
+                        <svg viewBox="0 0 36 36" class="circular-chart teal-chart">
+                            <path class="circle-bg"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="circle" id="pm25RingBg" stroke-dasharray="60, 100"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="ring-value" id="pm25Value">18.2</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel map-panel map-card">
+                <div class="map-overlay-header">
+                    <h3>GIS Mapping Interface</h3>
+                    <p id="mapLocationSubtitle"><span class="pin"></span> ISTANBUL: KANDILLI REFERENCE STATION</p>
+                </div>
+                <div id="kandilliMap" class="real-map"></div>
+                <div class="map-overlay-tools">
+                    <button class="map-tool">
+                        <svg viewBox="0 0 24 24">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                        </svg>
+                    </button>
+                    <button class="map-tool">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <line x1="8" y1="11" x2="14" y2="11"></line>
+                            <line x1="11" y1="8" x2="11" y2="14"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel calibrator-panel">
+                <h3 class="panel-header">Lab Calibrator</h3>
+                <p class="panel-sub">Simulate sensor environmental variables</p>
+
+                <div class="slider-group">
+                    <div class="slider-labels"><span>SO2 LEVEL</span> <span class="val teal-text"><span
+                                id="so2Display">12.5</span> ppb</span></div>
+                    <input type="range" class="tech-slider teal-slider" id="so2Slider" min="0" max="500" value="124">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-labels"><span>NO2 CONCENTRATION</span> <span class="val cyan-text"><span
+                                id="no2Display">38.2</span> ppb</span></div>
+                    <input type="range" class="tech-slider cyan-slider" id="no2Slider" min="0" max="300" value="38">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-labels"><span>AMBIENT TEMPERATURE</span> <span class="val cyan-text"><span
+                                id="tempVal">24.5</span>°C</span></div>
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-labels"><span>RELATIVE HUMIDITY</span> <span class="val cyan-text"><span
+                                id="humVal">62</span>%</span></div>
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-labels"><span>O3 SURFACE LEVEL</span> <span class="val cyan-text"><span
+                                id="o3Display">44.1</span> ppb</span></div>
+                    <input type="range" class="tech-slider cyan-slider" id="o3Slider" min="0" max="200" value="72">
+                </div>
+
+                <button class="btn-outline-glow mt-lg" id="resetBtn">RECALIBRATE ML CORE</button>
+            </div>
+
+            <div class="panel chart-panel" style="display: flex; flex-direction: column;">
+                <h3 class="panel-header">24-Hour Forecast Trend</h3>
+                <p class="panel-sub">Temporal analysis based on LSTM modeling</p>
+                <div class="chart-wrapper" style="flex: 1; min-height: 220px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+
+                <div class="shap-bar"
+                    style="margin-top: 20px; padding: 18px 24px; border-radius: 12px; background: rgba(20, 184, 166, 0.05); border: 1px solid rgba(20, 184, 166, 0.15); display: flex; align-items: flex-start; gap: 18px; box-shadow: inset 0 0 20px rgba(20,184,166,0.02);">
+                    <div
+                        style="background: rgba(20, 184, 166, 0.15); padding: 12px; border-radius: 10px; color: var(--teal); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(20,184,166,0.2);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                            </path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div style="flex: 1;">
+                        <h4
+                            style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; color: var(--teal); margin: 0 0 6px 0; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 0 10px rgba(20,184,166,0.3);">
+                            XAI: Real-Time Model Reasoning Data</h4>
+                        <p id="shapExplanation"
+                            style="font-size: 0.85rem; color: #cbd5e1; margin: 0; line-height: 1.6; font-family: 'Inter', sans-serif;">
+                            Awaiting live ML inference and feature attribution pipeline...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel metrics-panel">
+                <h3 class="panel-header">Model Performance</h3>
+                <p class="panel-sub">Validation Metrics Summary</p>
+
+                <div class="live-feed-badge" id="liveFeedBadge"><span class="teal-dot"></span> LIVE FEED: KANDILLI
+                    ACTIVE</div>
+
+                <div class="metric-row">
+                    <span class="m-label">R² SCORE</span>
+                    <span class="m-val cyan-text" id="r2Score">0.87</span>
+                </div>
+                <div class="metric-row mt-sm">
+                    <span class="m-label">CONFIDENCE</span>
+                    <span class="m-val" id="confidenceValue">82.4%</span>
+                </div>
+                <div class="metric-row mt-sm"
+                    style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                    <span class="m-label">TOTAL DATA ROWS</span>
+                    <span class="m-val">160,107</span>
+                </div>
+
+                <div class="metric-row mt-sm" style="border-bottom: none; padding-bottom: 0;">
+                    <span class="m-label">INFERENCE LATENCY</span>
+                    <span class="m-val" style="color: var(--teal);">42 ms</span>
+                </div>
+
+                <div style="margin-top: 35px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.1);">
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 0.65rem; color: #94a3b8; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">
+                        <span>COMPUTE NODE LOAD</span>
+                        <span id="nodeLoadText">24%</span>
+                    </div>
+                    <div
+                        style="width: 100%; height: 6px; background: rgba(20, 184, 166, 0.15); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);">
+                        <div id="nodeLoadBar"
+                            style="width: 24%; height: 100%; background: var(--teal); box-shadow: 0 0 10px var(--teal); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel forecast-panel" style="padding-bottom: 16px;">
+                <h3 class="panel-header">7-Day Meteorological & AQI Forecast</h3>
+                <p class="panel-sub" id="forecastSubtitle">Istanbul Active Station Predictive Weather Data</p>
+                <div id="forecastContainer"
+                    style="display: flex; gap: 14px; margin-top: 10px; width: 100%; overflow-x: auto; padding: 4px 0 8px 0; scrollbar-width: thin; scrollbar-color: rgba(14, 165, 233, 0.4) transparent;">
+                    <div style="color: var(--text-sub); font-size: 0.85rem;">Initializing satellite telemetry for 7-day
+                        forecast...</div>
+                </div>
             </div>
         </div>
-    </header>
+    </main>
 
-    <div class="dashboard-grid">
-        
-                <div class="panel prediction-panel">
-            <div class="panel-tag"><span class="blue-dot"></span> REAL-TIME INFERENCE</div>
-            <div class="pred-split">
-                <div class="pred-text">
-                    <h2 class="pred-title">Predicted<br>PM10</h2>
-                    <div class="confidence-badge">98.4% CONFIDENCE</div>
-                    <span class="pred-unit">µg/m³ units</span>
+    <div class="modal-overlay" id="dataConfigModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:rgba(5,8,17,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; flex-direction:column; padding:20px;">
+        <div class="modal-box"
+            style="background:#131a2a; padding:30px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); max-width:550px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
+            <h3
+                style="margin-top:0; color:var(--text-main); font-family:var(--f-title); font-size:1.3rem; border-bottom:1px solid rgba(30,215,96,0.3); padding-bottom:10px; display:flex; align-items:center; gap:8px;">
+                <svg width="20" height="20" fill="none" stroke="var(--teal)" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <line x1="3" y1="9" x2="21" y2="9" />
+                    <line x1="9" y1="21" x2="9" y2="9" />
+                </svg>
+                ML Architecture & Data Fusion
+            </h3>
+
+            <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
+                <div
+                    style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid var(--teal);">
+                    <strong style="color:var(--text-main); display:block; font-size: 0.9rem; margin-bottom: 4px;">1.
+                        Bidirectional Data Hub (160,107 Rows)</strong>
+                    <span style="color:var(--text-sub); font-size: 0.8rem;">Combines Istanbul Kandilli baseline with
+                        Seoul's large-scale gas distributions for extreme-case transfer learning.</span>
                 </div>
-                                <div class="pred-ring pm10-ring">
-                    <svg viewBox="0 0 36 36" class="circular-chart blue">
-                        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                        <path class="circle" id="pm10RingBg" stroke-dasharray="80, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                    </svg>
-                    <div class="ring-value" id="pm10Value">42.8</div>
+
+                <div
+                    style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
+                    <strong style="color:var(--text-main); display:block; font-size: 0.9rem; margin-bottom: 4px;">2.
+                        Residual Denoising (Random Forest)</strong>
+                    <span style="color:var(--text-sub); font-size: 0.8rem;">Initial model filters out top 50%
+                        environmental noise. Final model is trained purely on the cleaned data manifold yielding <b>0.87
+                            R²</b> accuracy.</span>
+                </div>
+
+                <div
+                    style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid var(--blue);">
+                    <strong style="color:var(--text-main); display:block; font-size: 0.9rem; margin-bottom: 4px;">3.
+                        Explainable AI (SHAP TreeExplainer)</strong>
+                    <span style="color:var(--text-sub); font-size: 0.8rem;">Black-box decision logic is disassembled in
+                        real-time, isolating individual meteorological features (Temp, Hum, Gases) influencing the PM
+                        predictions.</span>
                 </div>
             </div>
+
+            <button class="btn-predict-large" id="closeDataModalBtn"
+                style="width:100%; margin-top:20px; border-radius: 8px;">Acknowledge Architecture</button>
         </div>
+    </div>
 
-                <div class="panel prediction-panel">
-            <div class="panel-tag"><span class="teal-dot"></span> DEEP LEARNING OUTPUT</div>
-            <div class="pred-split">
-                <div class="pred-text">
-                    <h2 class="pred-title">Predicted<br>PM2.5</h2>
-                    <div class="confidence-badge teal">97.9% CONFIDENCE</div>
-                    <span class="pred-unit">µg/m³ units</span>
-                </div>
-                <div class="pred-ring pm25-ring">
-                    <svg viewBox="0 0 36 36" class="circular-chart teal-chart">
-                        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                        <path class="circle" id="pm25RingBg" stroke-dasharray="60, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                    </svg>
-                    <div class="ring-value" id="pm25Value">18.2</div>
-                </div>
-            </div>
-        </div>
+    <div class="modal-overlay" id="aboutModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:rgba(5,8,17,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; flex-direction:column; padding:20px;">
+        <div class="modal-box"
+            style="background:#131a2a; padding:30px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); max-width:550px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
+            <h3
+                style="margin-top:0; color:var(--text-main); font-family:var(--f-title); font-size:1.3rem; border-bottom:1px solid rgba(14,165,233,0.3); padding-bottom:10px; display:flex; align-items:center; gap:8px;">
+                <svg width="20" height="20" fill="none" stroke="var(--blue)" stroke-width="2">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+                    <path d="M12 8v4l3 3" />
+                </svg>
+                TÜBİTAK 2209-A Documentation
+            </h3>
 
-                <div class="panel map-panel map-card">
-            <div class="map-overlay-header">
-                <h3>GIS Mapping Interface</h3>
-                <p id="mapLocationSubtitle"><span class="pin"></span> ISTANBUL: KANDILLI REFERENCE STATION</p>
-            </div>
-            <div id="kandilliMap" class="real-map"></div>
-            <div class="map-overlay-tools">
-                <button class="map-tool">
-                    <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 12 12 17 22 12"></polyline><polyline points="2 17 12 22 22 17"></polyline></svg>
-                </button>
-                <button class="map-tool">
-                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line><line x1="11" y1="8" x2="11" y2="14"></line></svg>
-                </button>
-            </div>
-        </div>
+            <div style="margin-top: 15px; color: var(--text-sub); font-size: 0.85rem; line-height: 1.6;">
+                <p style="margin-bottom: 12px;"><strong>AeroPredict ML</strong> is an advanced Air Quality inference
+                    engine designed as a completely software-defined Digital Twin alternative to high-cost IoT sensor
+                    networks.</p>
 
-                <div class="panel calibrator-panel">
-            <h3 class="panel-header">Lab Calibrator</h3>
-            <p class="panel-sub">Simulate sensor environmental variables</p>
-            
-            <div class="slider-group">
-                <div class="slider-labels"><span>SO2 LEVEL</span> <span class="val teal-text"><span id="so2Display">12.5</span> ppb</span></div>
-                <input type="range" class="tech-slider teal-slider" id="so2Slider" min="0" max="500" value="124">
-            </div>
-            
-            <div class="slider-group">
-                <div class="slider-labels"><span>NO2 CONCENTRATION</span> <span class="val cyan-text"><span id="no2Display">38.2</span> ppb</span></div>
-                <input type="range" class="tech-slider cyan-slider" id="no2Slider" min="0" max="300" value="38">
+                <ul style="padding-left: 20px; margin-bottom: 15px; color: var(--text-main);">
+                    <li style="margin-bottom: 6px;"><strong>Spatial Solution:</strong> By leveraging Open-Meteo
+                        Satellite feeds, spatial constraints of placing physical devices are eliminated.</li>
+                    <li style="margin-bottom: 6px;"><strong>Accuracy Solution:</strong> Machine Learning overrides
+                        standard low-cost sensor drift, pushing accuracy metrics up to 87%.</li>
+                    <li><strong>Policy Ready:</strong> Integrated PDF reporting pipeline allows direct exportation of
+                        actionable environmental data to policymakers.</li>
+                </ul>
             </div>
 
-            <div class="slider-group">
-                <div class="slider-labels"><span>AMBIENT TEMPERATURE</span> <span class="val cyan-text"><span id="tempVal">24.5</span>°C</span></div>
-            </div>
-
-            <div class="slider-group">
-                <div class="slider-labels"><span>RELATIVE HUMIDITY</span> <span class="val cyan-text"><span id="humVal">62</span>%</span></div>
-            </div>
-
-            <div class="slider-group">
-                <div class="slider-labels"><span>O3 SURFACE LEVEL</span> <span class="val cyan-text"><span id="o3Display">44.1</span> ppb</span></div>
-                <input type="range" class="tech-slider cyan-slider" id="o3Slider" min="0" max="200" value="72">
-            </div>
-
-            <button class="btn-outline-glow mt-lg" id="resetBtn">RECALIBRATE ML CORE</button>
-        </div>
-
-                <div class="panel chart-panel" style="display: flex; flex-direction: column;">
-            <h3 class="panel-header">24-Hour Forecast Trend</h3>
-            <p class="panel-sub">Temporal analysis based on LSTM modeling</p>
-            <div class="chart-wrapper" style="flex: 1; min-height: 220px;">
-                <canvas id="trendChart"></canvas>
-            </div>
-            
-            <div class="shap-bar" style="margin-top: 20px; padding: 18px 24px; border-radius: 12px; background: rgba(20, 184, 166, 0.05); border: 1px solid rgba(20, 184, 166, 0.15); display: flex; align-items: flex-start; gap: 18px; box-shadow: inset 0 0 20px rgba(20,184,166,0.02);">
-                <div style="background: rgba(20, 184, 166, 0.15); padding: 12px; border-radius: 10px; color: var(--teal); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(20,184,166,0.2);">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                </div>
-                <div style="flex: 1;">
-                    <h4 style="font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif; color: var(--teal); margin: 0 0 6px 0; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 0 10px rgba(20,184,166,0.3);">XAI: Real-Time Model Reasoning Data</h4>
-                    <p id="shapExplanation" style="font-size: 0.85rem; color: #cbd5e1; margin: 0; line-height: 1.6; font-family: 'Inter', sans-serif;">Awaiting live ML inference and feature attribution pipeline...</p>
-                </div>
-            </div>
-        </div>
-
-                <div class="panel metrics-panel">
-            <h3 class="panel-header">Model Performance</h3>
-            <p class="panel-sub">Validation Metrics Summary</p>
-            
-            <div class="live-feed-badge" id="liveFeedBadge"><span class="teal-dot"></span> LIVE FEED: KANDILLI ACTIVE</div>
-            
-            <div class="metric-row">
-                <span class="m-label">R² SCORE</span>
-                <span class="m-val cyan-text" id="r2Score">0.87</span>
-            </div>
-            <div class="metric-row mt-sm">
-                <span class="m-label">CONFIDENCE</span>
-                <span class="m-val" id="confidenceValue">82.4%</span>
-            </div>
-            <div class="metric-row mt-sm" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
-                <span class="m-label">TOTAL DATA ROWS</span>
-                <span class="m-val">160,107</span>
-            </div>
-            
-            <div class="metric-row mt-sm" style="border-bottom: none; padding-bottom: 0;">
-                <span class="m-label">INFERENCE LATENCY</span>
-                <span class="m-val" style="color: var(--teal);">42 ms</span>
-            </div>
-            
-            <div style="margin-top: 35px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.1);">
-                <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: #94a3b8; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">
-                    <span>COMPUTE NODE LOAD</span>
-                    <span id="nodeLoadText">24%</span>
-                </div>
-                <div style="width: 100%; height: 6px; background: rgba(20, 184, 166, 0.15); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);">
-                    <div id="nodeLoadBar" style="width: 24%; height: 100%; background: var(--teal); box-shadow: 0 0 10px var(--teal); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="panel forecast-panel" style="padding-bottom: 16px;">
-            <h3 class="panel-header">7-Day Meteorological & AQI Forecast</h3>
-            <p class="panel-sub" id="forecastSubtitle">Istanbul Active Station Predictive Weather Data</p>
-            <div id="forecastContainer" style="display: flex; gap: 14px; margin-top: 10px; width: 100%; overflow-x: auto; padding: 4px 0 8px 0; scrollbar-width: thin; scrollbar-color: rgba(14, 165, 233, 0.4) transparent;">
-                <div style="color: var(--text-sub); font-size: 0.85rem;">Initializing satellite telemetry for 7-day forecast...</div>
+            <div
+                style="display:flex; justify-content: space-between; align-items:center; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                <span style="font-size: 0.75rem; color: #64748b; font-family: var(--f-mono);">v2.0.0-PRO</span>
+                <button class="btn-predict-large" id="closeAboutModalBtn"
+                    style="padding: 10px 24px; border-radius: 8px;">Dismiss Core Documentation</button>
             </div>
         </div>
     </div>
-</main>
 
-<div class="modal-overlay" id="dataConfigModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:rgba(5,8,17,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; flex-direction:column; padding:20px;">
-    <div class="modal-box" style="background:#131a2a; padding:30px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); max-width:550px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
-        <h3 style="margin-top:0; color:var(--text-main); font-family:var(--f-title); font-size:1.3rem; border-bottom:1px solid rgba(30,215,96,0.3); padding-bottom:10px; display:flex; align-items:center; gap:8px;">
-            <svg width="20" height="20" fill="none" stroke="var(--teal)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-            ML Architecture & Data Fusion
-        </h3>
-        
-        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
-            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid var(--teal);">
-                <strong style="color:var(--text-main); display:block; font-size: 0.9rem; margin-bottom: 4px;">1. Bidirectional Data Hub (160,107 Rows)</strong>
-                <span style="color:var(--text-sub); font-size: 0.8rem;">Combines Istanbul Kandilli baseline with Seoul's large-scale gas distributions for extreme-case transfer learning.</span>
-            </div>
-            
-            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid var(--cyan);">
-                <strong style="color:var(--text-main); display:block; font-size: 0.9rem; margin-bottom: 4px;">2. Residual Denoising (Random Forest)</strong>
-                <span style="color:var(--text-sub); font-size: 0.8rem;">Initial model filters out top 50% environmental noise. Final model is trained purely on the cleaned data manifold yielding <b>0.87 R²</b> accuracy.</span>
-            </div>
-
-            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid var(--blue);">
-                <strong style="color:var(--text-main); display:block; font-size: 0.9rem; margin-bottom: 4px;">3. Explainable AI (SHAP TreeExplainer)</strong>
-                <span style="color:var(--text-sub); font-size: 0.8rem;">Black-box decision logic is disassembled in real-time, isolating individual meteorological features (Temp, Hum, Gases) influencing the PM predictions.</span>
-            </div>
-        </div>
-
-        <button class="btn-predict-large" id="closeDataModalBtn" style="width:100%; margin-top:20px; border-radius: 8px;">Acknowledge Architecture</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="aboutModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:rgba(5,8,17,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; flex-direction:column; padding:20px;">
-    <div class="modal-box" style="background:#131a2a; padding:30px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); max-width:550px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
-        <h3 style="margin-top:0; color:var(--text-main); font-family:var(--f-title); font-size:1.3rem; border-bottom:1px solid rgba(14,165,233,0.3); padding-bottom:10px; display:flex; align-items:center; gap:8px;">
-            <svg width="20" height="20" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 8v4l3 3"/></svg>
-            TÜBİTAK 2209-A Documentation
-        </h3>
-        
-        <div style="margin-top: 15px; color: var(--text-sub); font-size: 0.85rem; line-height: 1.6;">
-            <p style="margin-bottom: 12px;"><strong>AeroPredict ML</strong> is an advanced Air Quality inference engine designed as a completely software-defined Digital Twin alternative to high-cost IoT sensor networks.</p>
-            
-            <ul style="padding-left: 20px; margin-bottom: 15px; color: var(--text-main);">
-                <li style="margin-bottom: 6px;"><strong>Spatial Solution:</strong> By leveraging Open-Meteo Satellite feeds, spatial constraints of placing physical devices are eliminated.</li>
-                <li style="margin-bottom: 6px;"><strong>Accuracy Solution:</strong> Machine Learning overrides standard low-cost sensor drift, pushing accuracy metrics up to 87%.</li>
-                <li><strong>Policy Ready:</strong> Integrated PDF reporting pipeline allows direct exportation of actionable environmental data to policymakers.</li>
-            </ul>
-        </div>
-        
-        <div style="display:flex; justify-content: space-between; align-items:center; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
-            <span style="font-size: 0.75rem; color: #64748b; font-family: var(--f-mono);">v2.0.0-PRO</span>
-            <button class="btn-predict-large" id="closeAboutModalBtn" style="padding: 10px 24px; border-radius: 8px;">Dismiss Core Documentation</button>
-        </div>
-    </div>
-</div>
-
-<script src="js/api-config.js"></script>
-<script src="js/predictions.js"></script>
-<script src="js/charts.js"></script>
-<script src="js/app.js"></script>
+    <script src="js/api-config.js"></script>
+    <script src="js/predictions.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
 </body>
+
 </html>

@@ -64,7 +64,7 @@ def load_models():
 @app.route('/')
 def home():
     return jsonify({
-        'service':      'AQI Calibrator API',
+        'service':      'AeroMetric XAI API',
         'version':      '2.0',
         'project':      'TÜBİTAK 2209-A',
         'model_pm10':   model_pm10 is not None,
@@ -194,7 +194,7 @@ def health():
 
 if __name__ == '__main__':
     print("\n" + "=" * 55)
-    print("  AQI Calibrator — API Server  |  TÜBİTAK 2209-A")
+    print("  AeroMetric XAI — API Server  |  TÜBİTAK 2209-A")
     print("=" * 55)
 
     load_models()

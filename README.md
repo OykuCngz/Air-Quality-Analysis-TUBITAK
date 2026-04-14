@@ -1,10 +1,14 @@
-# AeroPredict: High-Fidelity Air Quality Digital Twin & ML Analysis
+<p align="center">
+  <img src="logo.png" width="200" alt="AeroMetric XAI Logo">
+</p>
+
+# AeroMetric XAI: High-Fidelity Air Quality Digital Twin & ML Analysis
 **TÜBİTAK 2209-A Supported Research Project**
 
 ---
 
 ## Project Overview
-AeroPredict is an advanced air quality monitoring and prediction ecosystem designed to bridge the gap between low-cost IoT sensors and high-precision environmental analytics. By utilizing a Digital Twin framework, the project fuses local sensor data with global satellite telemetry (Open-Meteo) to provide accurate, explainable, and actionable insights for urban air quality management.
+AeroMetric XAI is an advanced air quality monitoring and prediction ecosystem designed to bridge the gap between low-cost IoT sensors and high-precision environmental analytics. By utilizing a Digital Twin framework, the project fuses local sensor data with global satellite telemetry (Open-Meteo) to provide accurate, explainable, and actionable insights for urban air quality management.
 
 ## Key Features
 
@@ -12,13 +16,13 @@ AeroPredict is an advanced air quality monitoring and prediction ecosystem desig
 - **Predictive Intelligence**: High-accuracy PM10 and PM2.5 forecasting using optimized Random Forest ensembles.
 - **Explainable AI (XAI)**: Integrated SHAP (TreeExplainer) for real-time feature attribution, demystifying the model's decision-making process.
 - **7-Day Dynamic Forecast**: Forward-looking air quality and meteorological projections powered by satellite data assimilation.
-- **AeroReport Engine**: Professional PDF generation system for exporting data-rich analytical reports suitable for policy-making.
+- **AeroMetric Report Engine**: Professional PDF generation system for exporting data-rich analytical reports suitable for policy-making.
 - **GIS Mapping**: Real-time spatial tracking of air quality nodes across Istanbul.
 
 ## Visual Preview
 
-![AeroPredict ML Dashboard](preview.png)
-![AeroPredict ML Insights](preview2.png)
+![AeroMetric XAI Dashboard](preview.png)
+![AeroMetric XAI Insights](preview2.png)
 
 ## Technical Architecture
 
@@ -51,7 +55,7 @@ AeroPredict is an advanced air quality monitoring and prediction ecosystem desig
 The platform integrates real-time satellite telemetry with local sensor fusion, providing a comprehensive Digital Twin of the urban air quality environment. Key analytical components include:
 
 - **XAI Reasoning**: Real-time feature attribution via SHAP.
-- **Meteorological Projections**: 7rd Day Forecast Matrix.
+- **Meteorological Projections**: 7-Day Forecast Matrix.
 - **Reporting**: Automated PDF Analytical Report generation.
 
 ## Installation and Deployment

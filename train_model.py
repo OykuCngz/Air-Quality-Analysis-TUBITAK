@@ -19,7 +19,7 @@ R2_TARGET      = 0.70
 FEATURES = ['SO2', 'NO2', 'CO', 'O3', 'Temperature', 'Humidity', 'Wind_Speed']
 
 print("=" * 60)
-print("  AQI Calibrator — Intelligent RF Training")
+print("  AeroMetric XAI — Intelligent RF Training")
 print("  TÜBİTAK 2209-A | Residual Denoising Pipeline")
 print("=" * 60)
 
