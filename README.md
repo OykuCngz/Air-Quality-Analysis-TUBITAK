@@ -18,6 +18,7 @@ AeroPredict is an advanced air quality monitoring and prediction ecosystem desig
 ## Visual Preview
 
 ![AeroPredict ML Dashboard](preview.png)
+![AeroPredict ML Insights](preview2.png)
 
 ## Technical Architecture
 
