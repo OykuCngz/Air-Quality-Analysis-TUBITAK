@@ -15,6 +15,10 @@ AeroPredict is an advanced air quality monitoring and prediction ecosystem desig
 - **AeroReport Engine**: Professional PDF generation system for exporting data-rich analytical reports suitable for policy-making.
 - **GIS Mapping**: Real-time spatial tracking of air quality nodes across Istanbul.
 
+## Visual Preview
+
+![AeroPredict ML Dashboard](preview.png)
+
 ## Technical Architecture
 
 ### Core Stack
@@ -41,12 +45,13 @@ AeroPredict is an advanced air quality monitoring and prediction ecosystem desig
 - Phase 5: High-Fidelity Dashboard Development (Completed)
 - Phase 6: Final Field Validation & TÜBİTAK Submission (In Progress)
 
-## Visual Showcase
-*(Placeholders for future implementation screenshots)*
-- [Dashboard Overview]
-- [XAI Reasoning Panel]
-- [7rd Day Forecast Matrix]
-- [PDF Analytical Report]
+## Features Detail
+
+The platform integrates real-time satellite telemetry with local sensor fusion, providing a comprehensive Digital Twin of the urban air quality environment. Key analytical components include:
+
+- **XAI Reasoning**: Real-time feature attribution via SHAP.
+- **Meteorological Projections**: 7rd Day Forecast Matrix.
+- **Reporting**: Automated PDF Analytical Report generation.
 
 ## Installation and Deployment
 

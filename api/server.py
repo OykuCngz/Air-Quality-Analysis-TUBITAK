@@ -30,7 +30,6 @@ metrics     = {}
 explainer_pm10 = None
 
 FEATURES = ['SO2', 'NO2', 'CO', 'O3', 'Temperature', 'Humidity', 'Wind_Speed']
-
 def load_models():
     global model_pm10, model_pm25, metrics, explainer_pm10
 
@@ -105,6 +104,7 @@ def predict():
                 live_hum  = current.get("relative_humidity_2m", 60.0)
                 live_wind = round(current.get("wind_speed_10m", 10.8) / 3.6, 2)
             except:
+                pass
 
         row = {
             'SO2':         float(data['SO2']),
@@ -201,7 +201,6 @@ if __name__ == '__main__':
 
     if model_pm10 is None:
         print("\n⚠️  No model found. Run 'python train_model.py' first.")
-        print("   Starting server anyway (will return 503 for predictions).\n")
 
     print(f"\n🚀 Server starting at http://localhost:5000\n")
     app.run(debug=True, host='0.0.0.0', port=5000)

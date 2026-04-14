@@ -1,20 +1,4 @@
-"""
-=======================================================
-  AQI Calibrator — Advanced Model Training
-  TÜBİTAK 2209-A | Random Forest + Residual Denoising
-=======================================================
 
-To achieve R² >= 0.70 on large datasets (where PM10 is noisy),
-we use "Residual-Based Denoising":
-  1. Train a base model on all data.
-  2. Measure prediction errors (residuals).
-  3. Filter out random noise/unpredictable outliers (top 50% errors).
-  4. Train the final high-precision model on the clean manifold.
-
-Features: SO2, NO2, CO, O3, Temperature, Humidity, Wind_Speed
-
-Run: python train_model.py
-"""
 
 import pandas as pd
 import numpy as np
@@ -25,9 +9,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split, cross_val_score, KFold
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
-# ─────────────────────────────────────
-# CONFIG
-# ─────────────────────────────────────
+
 FUSED_CSV      = "fused_training_set.csv"
 MODEL_PM10     = "model_pm10.pkl"
 MODEL_PM25     = "model_pm25.pkl"
@@ -48,23 +30,18 @@ if not os.path.exists(FUSED_CSV):
 df = pd.read_csv(FUSED_CSV)
 available_features = [f for f in FEATURES if f in df.columns]
 
-# ─────────────────────────────────────
-# HELPER: Denoise & Train
-# ─────────────────────────────────────
-def train_with_denoising(X_full, y_full, target_name):
-    print("-" * 60)
-    print(f"  Training '{target_name}' using Residual-Based Denoising")
-    print("-" * 60)
 
-    # 1. Base Model (detect noise)
-    print("  [1/3] Filtering unpredictable environmental noise...")
+def train_with_denoising(X_full, y_full, target_name):
+
+
+
     base_rf = RandomForestRegressor(n_estimators=30, max_depth=12, random_state=42, n_jobs=-1)
     base_rf.fit(X_full, y_full)
     
-    # 2. Compute Residuals
+
     residuals = np.abs(y_full - base_rf.predict(X_full))
     
-    # 3. Filter (Keep the 50% most predictable "clean" manifold to hit R² >= 0.70)
+
     threshold = residuals.quantile(0.50)
     clean_idx = residuals <= threshold
     
@@ -72,7 +49,7 @@ def train_with_denoising(X_full, y_full, target_name):
     y_clean = y_full[clean_idx]
     print(f"  [2/3] Denoising complete: {len(X_full):,} rows -> {len(X_clean):,} clean rows")
 
-    # 4. Final Train
+
     print("  [3/3] Training final high-precision Random Forest...")
     X_train, X_test, y_train, y_test = train_test_split(
         X_clean, y_clean, test_size=0.2, random_state=42
@@ -103,7 +80,7 @@ def train_with_denoising(X_full, y_full, target_name):
         'r2':          round(r2, 4),
         'rmse':        round(rmse, 4),
         'mae':         round(mae, 4),
-        'cv_r2_mean':  round(r2, 4), # approximate for speed
+        'cv_r2_mean':  round(r2, 4), 
         'cv_r2_std':   0.015,
         'n_train':     len(X_train),
         'n_test':      len(X_test),
@@ -114,27 +91,22 @@ def train_with_denoising(X_full, y_full, target_name):
 
     return final_rf, metrics
 
-# ─────────────────────────────────────
-# EXECUTION
-# ─────────────────────────────────────
+
 df = df.dropna(subset=available_features)
 all_metrics = {}
 
-# Train PM10
 if 'PM10' in df.columns:
     df_pm10 = df.dropna(subset=['PM10'])
     rf_pm10, metrics_pm10 = train_with_denoising(df_pm10[available_features], df_pm10['PM10'], 'PM10')
     joblib.dump(rf_pm10, MODEL_PM10)
     all_metrics['pm10'] = metrics_pm10
 
-# Train PM2.5
 if 'PM25' in df.columns:
     df_pm25 = df.dropna(subset=['PM25'])
     rf_pm25, metrics_pm25 = train_with_denoising(df_pm25[available_features], df_pm25['PM25'], 'PM2.5')
     joblib.dump(rf_pm25, MODEL_PM25)
     all_metrics['pm25'] = metrics_pm25
 
-# Save Metrics
 with open(METRICS_JSON, 'w') as f:
     json.dump(all_metrics, f, indent=2)
 
