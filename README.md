@@ -21,8 +21,18 @@ AeroMetric XAI is an advanced air quality monitoring and prediction ecosystem de
 
 ## Visual Preview
 
-![AeroMetric XAI Dashboard](preview.png)
-![AeroMetric XAI Insights](preview2.png)
+### 1. System Authorization & Security Gateway
+![AeroMetric XAI Authorization](auth_screen.png)
+
+### 2. Operational Dashboard & Digital Twin
+![AeroMetric XAI Dashboard](dashboard_main.png)
+
+### 3. XAI Analysis & Model Reasoning
+![AeroMetric XAI Insights](analytics_view.png)
+
+### 4. 7-Day Dynamic Forecast Matrix
+![AeroMetric XAI Forecast](forecast_view.png)
+
 
 ## Technical Architecture
 
