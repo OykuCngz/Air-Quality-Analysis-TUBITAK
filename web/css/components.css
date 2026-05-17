@@ -320,7 +320,10 @@ body.desktop-layout {
     .main-content {
         padding: 12px 14px 80px 14px;
         overflow-y: visible;
+        overflow-x: hidden;
         flex: 1;
+        width: 100%;
+        box-sizing: border-box;
     }
     .top-nav {
         flex-wrap: wrap;
@@ -334,6 +337,8 @@ body.desktop-layout {
     .dashboard-grid {
         grid-template-columns: 1fr;
         gap: 14px;
+        width: 100%;
+        overflow-x: hidden;
     }
     .prediction-panel:nth-child(1) { grid-column: 1 / 2; grid-row: 1 / 2; }
     .prediction-panel:nth-child(2) { grid-column: 1 / 2; grid-row: 2 / 3; }
@@ -345,8 +350,38 @@ body.desktop-layout {
     .pred-title { font-size: 1.4rem; }
     .pred-ring { width: 80px; height: 80px; }
     .ring-value { font-size: 1.2rem; }
-    .panel { padding: 16px; }
+    .panel {
+        padding: 16px;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
     .panel-header { font-size: 1rem; }
+
+    /* Forecast cards: 2-column grid on mobile instead of horizontal scroll */
+    #forecastContainer {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        overflow-x: unset !important;
+        width: 100% !important;
+    }
+
+    /* Fix text overflow in XAI / SHAP panel */
+    .shap-bar, [style*="shap-bar"] {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    #shapExplanation {
+        font-size: 0.78rem !important;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+    }
+
+    /* Prevent any element from overflowing screen */
+    * { max-width: 100%; box-sizing: border-box; }
+    canvas { max-width: 100% !important; }
 }
 
 @media print {
